@@ -1,0 +1,17 @@
+name: Notify PR
+
+on:
+  pull_request:
+    branches:
+      - master
+    types:
+      - opened
+      - reopened
+
+jobs:
+  notify:
+    name: Notify
+    uses: DigitalDreamsInc/workflows/.github/workflows/notify-pr-discord.yaml@master
+    with:
+      DISCORD_WEBHOOK_REF: op://digital-dreams/Discord/webhook
+    secrets: inherit
