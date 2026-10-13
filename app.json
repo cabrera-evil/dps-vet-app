@@ -8,9 +8,14 @@
     "scheme": "dpsvetapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "supportsTablet": true,
+      "bundleIdentifier": "com.digitaldreams.dpsvetapp",
+      "buildNumber": "1.0.0"
     },
     "android": {
+      "package": "com.digitaldreams.dpsvetapp",
+      "versionCode": 1,
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
