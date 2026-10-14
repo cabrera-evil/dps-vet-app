@@ -28,7 +28,6 @@ export function OptionPicker({
     <Modal
       animationType="slide"
       onRequestClose={onClose}
-      presentationStyle="pageSheet"
       transparent
       visible={visible}
     >
