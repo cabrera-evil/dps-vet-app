@@ -7,6 +7,7 @@ type ClientPlaceholderScreenProps = {
   title: string;
   description: string;
   actionLabel: string;
+  onAction?: () => void;
   children: ReactNode;
 };
 
@@ -14,6 +15,7 @@ export function ClientPlaceholderScreen({
   title,
   description,
   actionLabel,
+  onAction,
   children,
 }: ClientPlaceholderScreenProps) {
   return (
@@ -27,13 +29,15 @@ export function ClientPlaceholderScreen({
       </Text>
       <View className="mt-8 gap-3">{children}</View>
       <Pressable
-        accessibilityLabel={`${actionLabel}, próximamente`}
+        accessibilityLabel={actionLabel}
         className="mt-8 min-h-13 items-center justify-center rounded-2xl bg-primary px-5"
-        onPress={() =>
-          Alert.alert(
-            "Próximamente",
-            `${actionLabel} estará disponible en la siguiente vista.`,
-          )
+        onPress={
+          onAction ??
+          (() =>
+            Alert.alert(
+              "Próximamente",
+              `${actionLabel} estará disponible en la siguiente vista.`,
+            ))
         }
       >
         <Text className="font-semibold text-primary-foreground">

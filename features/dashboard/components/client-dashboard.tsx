@@ -1,14 +1,17 @@
+import { router } from "expo-router";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { useAuthSession } from "@/features/auth/auth-session-context";
 import { dashboardMock } from "@/features/dashboard/dashboard.mock";
+import { usePetPreview } from "@/features/pets/pet-preview-context";
 
 import { DashboardSection } from "./dashboard-section";
 import { PetSummaryCard } from "./pet-summary-card";
 
 export function ClientDashboard() {
   const { session } = useAuthSession();
+  const { pets } = usePetPreview();
   const appointment = dashboardMock.nextAppointment;
 
   return (
@@ -68,18 +71,13 @@ export function ClientDashboard() {
           showsHorizontalScrollIndicator={false}
           contentContainerClassName="pr-6"
         >
-          {dashboardMock.pets.map((pet) => (
+          {pets.map((pet) => (
             <PetSummaryCard key={pet.id} pet={pet} />
           ))}
           <Pressable
-            accessibilityLabel="Agregar mascota próximamente"
+            accessibilityLabel="Agregar mascota"
             className="w-32 items-center justify-center rounded-2xl border border-dashed border-primary bg-secondary/40 p-4"
-            onPress={() =>
-              Alert.alert(
-                "Próximamente",
-                "Podrás registrar una mascota desde aquí.",
-              )
-            }
+            onPress={() => router.push("/(client)/pets/new")}
           >
             <Text className="text-2xl text-primary">+</Text>
             <Text className="mt-2 text-center text-sm font-semibold text-primary">
