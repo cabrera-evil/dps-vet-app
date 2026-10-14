@@ -10,6 +10,7 @@ import { useColorScheme } from "react-native";
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { queryClient } from "@/providers/query-client-provider";
 import { AuthSessionProvider } from "@/features/auth/auth-session-context";
+import { PetPreviewProvider } from "@/features/pets/pet-preview-context";
 import "@/global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -31,13 +32,15 @@ export default function RootLayout() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSessionProvider>
-        <GluestackUIProvider mode="system">
-          <ThemeProvider
-            value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
-          >
-            <Stack screenOptions={{ headerShown: false }} />
-          </ThemeProvider>
-        </GluestackUIProvider>
+        <PetPreviewProvider>
+          <GluestackUIProvider mode="system">
+            <ThemeProvider
+              value={colorScheme === "dark" ? DarkTheme : DefaultTheme}
+            >
+              <Stack screenOptions={{ headerShown: false }} />
+            </ThemeProvider>
+          </GluestackUIProvider>
+        </PetPreviewProvider>
       </AuthSessionProvider>
     </QueryClientProvider>
   );

@@ -1,17 +1,21 @@
+import { router } from "expo-router";
 import { View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { ClientPlaceholderScreen } from "@/features/dashboard/components/client-placeholder-screen";
-import { dashboardMock } from "@/features/dashboard/dashboard.mock";
+import { usePetPreview } from "@/features/pets/pet-preview-context";
 
 export default function PetsRoute() {
+  const { pets } = usePetPreview();
+
   return (
     <ClientPlaceholderScreen
       actionLabel="Registrar mascota"
       description="Aquí tendrás a la mano la información esencial de cada compañero."
+      onAction={() => router.push("/(client)/pets/new")}
       title="Mis mascotas"
     >
-      {dashboardMock.pets.map((pet) => (
+      {pets.map((pet) => (
         <View
           key={pet.id}
           className="flex-row items-center rounded-2xl border border-border bg-card p-4"
