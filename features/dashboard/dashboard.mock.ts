@@ -2,8 +2,15 @@ export type MockPet = {
   id: string;
   name: string;
   species: string;
-  breed: string;
+  breed?: string;
   accent: "teal" | "orange";
+  birthDate?: string;
+  sex?: "MALE" | "FEMALE";
+  sterilized?: boolean;
+  color?: string;
+  markings?: string;
+  microchip?: string;
+  notes?: string;
 };
 
 export type MockAppointment = {
