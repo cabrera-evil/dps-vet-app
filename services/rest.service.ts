@@ -5,7 +5,9 @@ import axios, {
 } from 'axios';
 import dayjs from 'dayjs';
 
-import type { RequestParams } from '@/types/rest';
+import { getApiBaseUrl } from '@/lib/env';
+import { getStoredToken } from '@/lib/token-store';
+import type { RequestParams, TokenProvider, UnauthorizedHandler } from '@/types/rest';
 
 const SENSITIVE_KEY = /authorization|token|secret|password|api[._-]?key/i;
 const requestStartTimes = new WeakMap<object, number>();
@@ -33,10 +35,35 @@ function toDebugJson(value: unknown): string {
 export class RestService {
 	private static instance: RestService | undefined;
 	private readonly client: AxiosInstance;
+	private tokenProvider: TokenProvider = getStoredToken;
+	// ponytail: 401 is only reported, no refresh yet (Phase 2).
+	private unauthorizedHandler: UnauthorizedHandler = () => {};
 
 	private constructor() {
-		this.client = axios.create();
+		this.client = axios.create({ baseURL: getApiBaseUrl() });
+		this.setupAuth();
 		this.setupDevelopmentLogger();
+	}
+
+	setTokenProvider(provider: TokenProvider): void {
+		this.tokenProvider = provider;
+	}
+
+	setUnauthorizedHandler(handler: UnauthorizedHandler): void {
+		this.unauthorizedHandler = handler;
+	}
+
+	private setupAuth(): void {
+		this.client.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
+			const token = await this.tokenProvider();
+			if (token) config.headers.set('Authorization', `Bearer ${token}`);
+			return config;
+		});
+
+		this.client.interceptors.response.use(undefined, (error: AxiosError) => {
+			if (error.response?.status === 401) this.unauthorizedHandler(error);
+			return Promise.reject(error);
+		});
 	}
 
 	static getInstance(): RestService {
