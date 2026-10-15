@@ -11,13 +11,13 @@ import {
   appointmentTimeSlots,
 } from "@/features/appointments/appointment.mock";
 import { useAppointmentForm } from "@/features/appointments/use-appointment-form";
-import { usePetPreview } from "@/features/pets/pet-preview-context";
+import { usePets } from "@/features/pets/use-pets";
 import { FormScreen } from "@/features/shared/components/form-screen";
 
 import { AppointmentSelectField } from "./appointment-select-field";
 
 export function NewAppointmentForm() {
-  const { pets } = usePetPreview();
+  const { pets, isPending: petsLoading, isError: petsError } = usePets();
   const form = useAppointmentForm();
 
   const petOptions = useMemo(
@@ -93,10 +93,19 @@ export function NewAppointmentForm() {
         </View>
 
         <AppointmentSelectField
+          disabled={pets.length === 0}
           error={form.errors.petId}
           label="Mascota *"
           onPress={() => form.setActivePicker("pet")}
-          placeholder="Selecciona una mascota"
+          placeholder={
+            petsLoading
+              ? "Cargando mascotas..."
+              : petsError
+                ? "No pudimos cargar tus mascotas"
+                : pets.length === 0
+                  ? "Registra una mascota primero"
+                  : "Selecciona una mascota"
+          }
           value={selectedPet?.label ?? ""}
         />
         <AppointmentSelectField

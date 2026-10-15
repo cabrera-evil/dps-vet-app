@@ -1,18 +1,3 @@
-export type MockPet = {
-  id: string;
-  name: string;
-  species: string;
-  breed?: string;
-  accent: "teal" | "orange";
-  birthDate?: string;
-  sex?: "MALE" | "FEMALE";
-  sterilized?: boolean;
-  color?: string;
-  markings?: string;
-  microchip?: string;
-  notes?: string;
-};
-
 export type MockAppointment = {
   petName: string;
   service: string;
@@ -27,22 +12,6 @@ export type MockQuickAction = {
 };
 
 export const dashboardMock = {
-  pets: [
-    {
-      id: "luna",
-      name: "Luna",
-      species: "Perra",
-      breed: "Golden retriever",
-      accent: "teal",
-    },
-    {
-      id: "milo",
-      name: "Milo",
-      species: "Gato",
-      breed: "Mestizo",
-      accent: "orange",
-    },
-  ] satisfies MockPet[],
   nextAppointment: {
     petName: "Luna",
     service: "Consulta general",

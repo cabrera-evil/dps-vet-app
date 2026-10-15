@@ -1,13 +1,13 @@
 import { router } from "expo-router";
 import { CalendarPlus, ChevronRight, ClipboardList, Moon, PawPrint, Plus, Sun } from "lucide-react-native";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
 
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
 import { Text } from "@/components/ui/text";
 import { useAuthSession } from "@/features/auth/auth-session-context";
 import { dashboardMock } from "@/features/dashboard/dashboard.mock";
 import { useThemeMode } from "@/features/shared/theme-mode";
-import { usePetPreview } from "@/features/pets/pet-preview-context";
+import { petAccent, usePets } from "@/features/pets/use-pets";
 import { SCREEN_GUTTER } from "@/features/shared/layout";
 import { ScreenScroll } from "@/features/shared/components/screen-scroll";
 
@@ -16,7 +16,7 @@ import { PetSummaryCard } from "./pet-summary-card";
 
 export function ClientDashboard() {
   const { user } = useAuthSession();
-  const { pets } = usePetPreview();
+  const { pets, isPending, isError, refetch } = usePets();
   const appointment = dashboardMock.nextAppointment;
   const { scheme, setMode } = useThemeMode();
   const isDark = scheme === "dark";
@@ -93,8 +93,24 @@ export function ClientDashboard() {
           style={{ marginHorizontal: -SCREEN_GUTTER }}
           showsHorizontalScrollIndicator={false}
         >
-          {pets.map((pet) => (
-            <PetSummaryCard key={pet.id} pet={pet} />
+          {isPending ? (
+            <View className="mr-3 min-h-11 w-40 items-center justify-center">
+              <ActivityIndicator accessibilityLabel="Cargando mascotas" />
+            </View>
+          ) : null}
+          {isError ? (
+            <Pressable
+              accessibilityRole="button"
+              className="mr-3 min-h-11 w-40 justify-center rounded-xl border border-border bg-card p-4 active:opacity-70"
+              onPress={() => refetch()}
+            >
+              <Text className="text-sm text-muted-foreground">
+                No pudimos cargar tus mascotas. Toca para reintentar.
+              </Text>
+            </Pressable>
+          ) : null}
+          {pets.map((pet, index) => (
+            <PetSummaryCard key={pet.id} accent={petAccent(index)} pet={pet} />
           ))}
           <Pressable
             accessibilityLabel="Agregar mascota"

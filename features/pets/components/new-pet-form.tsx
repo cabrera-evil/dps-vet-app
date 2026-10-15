@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { router } from "expo-router";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { Alert, View } from "react-native";
 
 import { OptionPicker } from "@/components/option-picker";
@@ -10,14 +10,16 @@ import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { formatIsoDateInput } from "@/utils/date";
-import {
-  getBreedsForSpecies,
-  petCatalog,
-  petSexOptions,
-} from "@/features/pets/pet-catalog.mock";
 import { AppointmentSelectField } from "@/features/appointments/components/appointment-select-field";
-import { usePetPreview } from "@/features/pets/pet-preview-context";
+import { useBreeds, useCreatePet, useSpecies } from "@/features/pets/use-pets";
+import { parseApiError } from "@/lib/api-error";
+import { requestErrorMessage } from "@/features/auth/validate";
 import { FormScreen } from "@/features/shared/components/form-screen";
+
+const petSexOptions = [
+  { label: "Macho", value: "MALE" },
+  { label: "Hembra", value: "FEMALE" },
+] as const;
 
 const newPetSchema = z
   .object({
@@ -35,11 +37,7 @@ const newPetSchema = z
     markings: z.string().max(300, "Máximo 300 caracteres"),
     notes: z.string().max(2000, "Máximo 2000 caracteres"),
   })
-  .superRefine((values, context) => {
-    if (getBreedsForSpecies(values.species).length > 0 && !values.breed) {
-      context.addIssue({ code: "custom", path: ["breed"], message: "Selecciona la raza" });
-    }
-  });
+  ;
 
 type NewPetValues = z.infer<typeof newPetSchema>;
 type FieldName = keyof NewPetValues;
@@ -74,12 +72,17 @@ function FieldError({ message }: { message?: string }) {
 }
 
 export function NewPetForm() {
-  const { addPet } = usePetPreview();
+  const { createPet, isPending } = useCreatePet();
   const [values, setValues] = useState<NewPetValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [activePicker, setActivePicker] = useState<PickerName>(null);
 
-  const breeds = useMemo(() => getBreedsForSpecies(values.species), [values.species]);
+  const [formError, setFormError] = useState<string | null>(null);
+  const speciesQuery = useSpecies();
+  const breedsQuery = useBreeds(values.species);
+  const breeds = breedsQuery.breeds;
+  // The breed is required only once the catalog says this species has breeds.
+  const breedRequired = breeds.length > 0;
 
   const updateValue = <Key extends FieldName>(field: Key, value: NewPetValues[Key]) => {
     setValues((current) => ({ ...current, [field]: value }));
@@ -103,37 +106,52 @@ export function NewPetForm() {
     if (activePicker === "sex") updateValue("sex", value as NewPetValues["sex"]);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const parsed = newPetSchema.safeParse(values);
+    const nextErrors: FormErrors = {};
     if (!parsed.success) {
-      const nextErrors: FormErrors = {};
       for (const issue of parsed.error.issues) {
         const field = issue.path[0];
-        if (typeof field === "string") nextErrors[field as FieldName] = issue.message;
+        if (typeof field === "string") nextErrors[field as FieldName] ??= issue.message;
       }
+    }
+    if (breedRequired && !values.breed) nextErrors.breed = "Selecciona la raza";
+    if (!parsed.success || nextErrors.breed) {
       setErrors(nextErrors);
       return;
     }
 
-    addPet({
-      ...parsed.data,
-      breed: parsed.data.breed || undefined,
-      sex: parsed.data.sex || undefined,
-      color: parsed.data.color || undefined,
-      microchip: parsed.data.microchip || undefined,
-      markings: parsed.data.markings || undefined,
-      notes: parsed.data.notes || undefined,
-    });
-    Alert.alert("Mascota registrada", `${parsed.data.name} ya aparece en tu lista de vista previa.`, [
+    const { data } = parsed;
+    setFormError(null);
+    try {
+      await createPet({
+        name: data.name,
+        species: data.species,
+        breed: data.breed || undefined,
+        birthDate: data.birthDate,
+        sex: data.sex || undefined,
+        sterilized: data.sterilized,
+        color: data.color || undefined,
+        microchip: data.microchip || undefined,
+        markings: data.markings || undefined,
+        notes: data.notes || undefined,
+      });
+    } catch (error) {
+      const { status, fieldErrors } = parseApiError(error);
+      if (status === 400 && Object.keys(fieldErrors).length) setErrors(fieldErrors);
+      else setFormError(requestErrorMessage(status));
+      return;
+    }
+    Alert.alert("Mascota registrada", `${data.name} ya aparece en tu lista de mascotas.`, [
       { text: "Ver mascotas", onPress: () => router.back() },
     ]);
   };
 
   const pickerOptions =
     activePicker === "species"
-      ? petCatalog.map((entry) => ({ label: entry.species, value: entry.species }))
+      ? speciesQuery.species.map((entry) => ({ label: entry.name, value: entry.name }))
       : activePicker === "breed"
-        ? breeds.map((breed) => ({ label: breed, value: breed }))
+        ? breeds.map((breed) => ({ label: breed.name, value: breed.name }))
         : petSexOptions;
 
   return (
@@ -159,13 +177,19 @@ export function NewPetForm() {
           error={errors.species}
           label="Especie *"
           onPress={() => setActivePicker("species")}
-          placeholder="Selecciona la especie"
+          disabled={speciesQuery.isPending || speciesQuery.isError}
+          placeholder={
+            speciesQuery.isPending
+              ? "Cargando especies..."
+              : speciesQuery.isError
+                ? "No pudimos cargar las especies"
+                : "Selecciona la especie"
+          }
           value={values.species}
         />
 
-        {breeds.length > 0 ? (
+        {breedRequired ? (
           <AppointmentSelectField
-            disabled={!values.species}
             error={errors.breed}
             label="Raza *"
             onPress={() => setActivePicker("breed")}
@@ -239,8 +263,14 @@ export function NewPetForm() {
           <FieldError message={errors.notes} />
         </View>
 
-        <Button className="mt-8 min-h-12 rounded-lg" onPress={handleSubmit}>
-          <ButtonText className="font-sans-semibold">Registrar mascota</ButtonText>
+        {formError ? <FieldError message={formError} /> : null}
+        <Button
+          accessibilityState={{ busy: isPending, disabled: isPending }}
+          className="mt-8 min-h-12 rounded-lg"
+          disabled={isPending}
+          onPress={handleSubmit}
+        >
+          <ButtonText className="font-sans-semibold">{isPending ? "Registrando..." : "Registrar mascota"}</ButtonText>
         </Button>
       <OptionPicker
         onClose={() => setActivePicker(null)}

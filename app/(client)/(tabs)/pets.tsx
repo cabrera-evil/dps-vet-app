@@ -1,13 +1,13 @@
 import { router } from "expo-router";
-import { View } from "react-native";
+import { ActivityIndicator, Pressable, View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import { ClientPlaceholderScreen } from "@/features/dashboard/components/client-placeholder-screen";
 import { PetSpeciesIcon } from "@/features/pets/components/pet-species-icon";
-import { usePetPreview } from "@/features/pets/pet-preview-context";
+import { usePets } from "@/features/pets/use-pets";
 
 export default function PetsRoute() {
-  const { pets } = usePetPreview();
+  const { pets, isPending, isError, refetch } = usePets();
 
   return (
     <ClientPlaceholderScreen
@@ -16,7 +16,19 @@ export default function PetsRoute() {
       onAction={() => router.push("/(client)/pets/new")}
       title="Mis mascotas"
     >
-      {pets.length === 0 ? (
+      {isPending ? <ActivityIndicator accessibilityLabel="Cargando mascotas" /> : null}
+      {isError ? (
+        <Pressable
+          accessibilityRole="button"
+          className="min-h-11 items-center justify-center rounded-xl border border-border bg-card p-4 active:opacity-70"
+          onPress={() => refetch()}
+        >
+          <Text className="text-center text-muted-foreground">
+            No pudimos cargar tus mascotas. Toca para reintentar.
+          </Text>
+        </Pressable>
+      ) : null}
+      {!isPending && !isError && pets.length === 0 ? (
         <View className="items-center rounded-xl border border-dashed border-border bg-card p-6">
           <Text className="text-center text-muted-foreground">
             Aún no tienes mascotas registradas.

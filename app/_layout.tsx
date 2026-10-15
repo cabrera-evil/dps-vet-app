@@ -17,7 +17,6 @@ import {
   AuthSessionProvider,
   useAuthSession,
 } from "@/features/auth/auth-session-context";
-import { PetPreviewProvider } from "@/features/pets/pet-preview-context";
 import { NO_GUTTER_STYLE, SCENE_GUTTER_STYLE } from "@/features/shared/layout";
 import { getNavigationTheme } from "@/features/shared/navigation-theme";
 import { ThemeModeProvider, useThemeMode } from "@/features/shared/theme-mode";
@@ -51,16 +50,14 @@ function RootNavigator() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthSessionProvider>
-        <PetPreviewProvider>
-          <GluestackUIProvider mode={mode}>
-            <ThemeProvider
-              value={getNavigationTheme(colorScheme)}
-            >
-              <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-              <GuardedStack />
-            </ThemeProvider>
-          </GluestackUIProvider>
-        </PetPreviewProvider>
+        <GluestackUIProvider mode={mode}>
+          <ThemeProvider
+            value={getNavigationTheme(colorScheme)}
+          >
+            <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
+            <GuardedStack />
+          </ThemeProvider>
+        </GluestackUIProvider>
       </AuthSessionProvider>
     </QueryClientProvider>
   );

@@ -1,12 +1,13 @@
 import { View } from "react-native";
 
 import { Text } from "@/components/ui/text";
-import type { MockPet } from "@/features/dashboard/dashboard.mock";
+import type { PetAccent } from "@/features/pets/use-pets";
+import type { Pet } from "@/types/pet.type";
 import { PetSpeciesIcon } from "@/features/pets/components/pet-species-icon";
 
-export function PetSummaryCard({ pet }: { pet: MockPet }) {
+export function PetSummaryCard({ pet, accent }: { pet: Pet; accent: PetAccent }) {
   const accentClassName =
-    pet.accent === "teal"
+    accent === "teal"
       ? "bg-secondary text-secondary-foreground"
       : "bg-accent text-accent-foreground";
 
