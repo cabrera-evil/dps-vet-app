@@ -1,4 +1,8 @@
-import { Permission } from '@/constants/permission';
+import {
+	CUSTOMER_ALLOWED_PERMISSIONS,
+	CUSTOMER_REQUIRED_PERMISSIONS,
+	Permission,
+} from '@/constants/permission';
 
 export function hasPermission(
 	userPermissions: Permission[] | undefined,
@@ -13,3 +17,9 @@ export function hasPermission(
 		? required.every((permission) => granted.has(permission))
 		: required.some((permission) => granted.has(permission));
 }
+
+/** Customer-app gate: holds the required permissions and nothing beyond the customer set (fail closed). */
+export const isCustomerAccount = (permissions: Permission[] | undefined): boolean =>
+	hasPermission(permissions, CUSTOMER_REQUIRED_PERMISSIONS, 'all') &&
+	!!permissions &&
+	permissions.every((p) => CUSTOMER_ALLOWED_PERMISSIONS.includes(p));

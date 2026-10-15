@@ -20,3 +20,24 @@ export enum Permission {
 	ORDERS_MANAGE_ALL = 'orders:manage-all',
 	REPORTS_READ = 'reports:read',
 }
+
+// Source of truth: dps-vet-web scripts/seed/catalog/role.catalog.ts (CLIENTE role).
+// Any permission added to CLIENTE there MUST be added to CUSTOMER_ALLOWED_PERMISSIONS here,
+// otherwise customers holding it are rejected (fail closed).
+
+/** Permissions a user must hold to use the customer app (checked by permission, never by role). */
+export const CUSTOMER_REQUIRED_PERMISSIONS: Permission[] = [
+	Permission.PETS_READ,
+	Permission.APPOINTMENTS_READ,
+];
+
+/** Superset a customer may hold; any permission outside it marks a staff account. */
+export const CUSTOMER_ALLOWED_PERMISSIONS: Permission[] = [
+	Permission.PETS_READ,
+	Permission.PETS_WRITE,
+	Permission.APPOINTMENTS_READ,
+	Permission.APPOINTMENTS_WRITE,
+	Permission.MEDICAL_RECORDS_READ,
+	Permission.ORDERS_READ,
+	Permission.ORDERS_WRITE,
+];

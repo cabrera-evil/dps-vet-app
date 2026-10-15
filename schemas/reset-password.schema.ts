@@ -4,15 +4,15 @@ export const resetPasswordSchema = z
 	.object({
 		password: z
 			.string()
-			.min(8, { message: 'Password must be at least 8 characters' })
-			.max(50, { message: 'Password must not exceed 50 characters' }),
+			.min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+			.max(128, { message: 'La contraseña no debe exceder 128 caracteres' }),
 		confirmPassword: z
 			.string()
-			.min(8, { message: 'Password must be at least 8 characters' })
-			.max(50, { message: 'Password must not exceed 50 characters' }),
+			.min(8, { message: 'La contraseña debe tener al menos 8 caracteres' })
+			.max(128, { message: 'La contraseña no debe exceder 128 caracteres' }),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
-		message: 'Passwords do not match',
+		message: 'Las contraseñas no coinciden',
 		path: ['confirmPassword'],
 	});
 

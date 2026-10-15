@@ -15,7 +15,7 @@ import { DashboardSection } from "./dashboard-section";
 import { PetSummaryCard } from "./pet-summary-card";
 
 export function ClientDashboard() {
-  const { session } = useAuthSession();
+  const { user } = useAuthSession();
   const { pets } = usePetPreview();
   const appointment = dashboardMock.nextAppointment;
   const { scheme, setMode } = useThemeMode();
@@ -27,7 +27,7 @@ export function ClientDashboard() {
         <View className="flex-1 pr-5">
           <Text className="text-sm font-sans-semibold text-primary">SAN ROQUE</Text>
           <Text accessibilityRole="header" className="mt-2 font-heading text-3xl leading-9 text-foreground">
-            Hola, {session?.client.firstName ?? "amiga"}
+            Hola, {user?.name?.split(" ")[0] ?? "amiga"}
           </Text>
           <Text className="mt-2 text-base leading-6 text-muted-foreground">
             Cuida a quienes hacen tus días mejores.

@@ -3,9 +3,9 @@ import { z } from 'zod';
 export const forgotPasswordSchema = z.object({
 	email: z
 		.string()
-		.min(5, { message: 'Identifier must be at least 5 characters' })
-		.max(50, { message: 'Identifier must not exceed 50 characters' })
-		.email({ message: 'Invalid email address' }),
+		.min(1, { message: 'El correo electrónico es obligatorio' })
+		.max(254, { message: 'El correo electrónico es demasiado largo' })
+		.email({ message: 'Ingresa un correo electrónico válido' }),
 });
 
 export type ForgotPassword = z.infer<typeof forgotPasswordSchema>;

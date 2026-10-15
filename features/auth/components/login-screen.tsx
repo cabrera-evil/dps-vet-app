@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react-native";
 import { Pressable, TextInput, View } from "react-native";
@@ -11,7 +10,10 @@ import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { KeyboardScreen } from "@/features/shared/components/keyboard-screen";
 import { useAuthSession } from "@/features/auth/auth-session-context";
+import { AuthError } from "@/lib/auth-session";
 
+import { requestErrorMessage } from "../validate";
+import { AuthLink } from "./auth-link";
 import { LoginVisual } from "./login-visual";
 
 const loginSchema = z.object({
@@ -22,14 +24,34 @@ const loginSchema = z.object({
 type LoginValues = z.infer<typeof loginSchema>;
 type LoginErrors = Partial<Record<keyof LoginValues, string>>;
 
+function messageFor(error: unknown): string | null {
+  switch (error instanceof AuthError ? error.code : "unknown") {
+    case "validation":
+      return null;
+    case "invalid-credentials":
+      return "Correo o contraseña incorrectos.";
+    case "rate-limited":
+      return "Demasiados intentos. Inténtalo de nuevo más tarde.";
+    case "not-customer":
+      return "Esta app es solo para clientes; usa la versión web.";
+    case "network":
+    case "verify-failed":
+      return "No pudimos conectarnos. Revisa tu conexión e inténtalo de nuevo.";
+    default:
+      return "Ocurrió un error inesperado. Inténtalo de nuevo.";
+  }
+}
+
 const emptyValues: LoginValues = { email: "", password: "" };
 
 export function LoginScreen() {
-  const { signIn } = useAuthSession();
+  const { signIn, restoreFailed, retryRestore } = useAuthSession();
   const [values, setValues] = useState<LoginValues>(emptyValues);
   const [errors, setErrors] = useState<LoginErrors>({});
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isRetrying, setIsRetrying] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
   const insets = useSafeAreaInsets();
   const passwordRef = useRef<TextInput>(null);
 
@@ -51,13 +73,29 @@ export function LoginScreen() {
       return;
     }
 
+    setFormError(null);
     setIsSubmitting(true);
     try {
-      await signIn(parsed.data);
-      router.replace("/(client)/(tabs)");
-    } finally {
+      // On success the route guards move the user to the client area.
+      await signIn(parsed.data.email, parsed.data.password);
+    } catch (error) {
+      const hasFieldErrors =
+        error instanceof AuthError && error.code === "validation" && Object.keys(error.fieldErrors).length > 0;
+      if (hasFieldErrors) {
+        setErrors({
+          email: error.fieldErrors.email,
+          password: error.fieldErrors.password,
+        });
+      }
+      setFormError(hasFieldErrors ? null : messageFor(error) ?? requestErrorMessage(400));
       setIsSubmitting(false);
     }
+  };
+
+  const handleRetryRestore = async () => {
+    setIsRetrying(true);
+    await retryRestore();
+    setIsRetrying(false);
   };
 
   return (
@@ -77,6 +115,23 @@ export function LoginScreen() {
           <Text className="mt-2 text-base leading-6 text-muted-foreground">
             Ingresa para ver cómo están tus compañeros.
           </Text>
+
+          {restoreFailed ? (
+            <View className="mt-6 gap-3 rounded-lg border border-border bg-secondary p-4">
+              <Text className="text-sm leading-5 text-secondary-foreground">
+                No pudimos restaurar tu sesión por falta de conexión.
+              </Text>
+              <Button
+                className="min-h-11 rounded-lg"
+                disabled={isRetrying}
+                onPress={handleRetryRestore}
+                variant="outline"
+              >
+                {isRetrying ? <ButtonSpinner /> : null}
+                <ButtonText className="font-sans-semibold">Reintentar</ButtonText>
+              </Button>
+            </View>
+          ) : null}
 
           <View className="mt-7 gap-5">
             <View className="gap-2">
@@ -153,21 +208,28 @@ export function LoginScreen() {
             </View>
           </View>
 
+          {formError ? (
+            <Text accessibilityRole="alert" className="mt-5 text-sm text-destructive">
+              {formError}
+            </Text>
+          ) : null}
+
           <Button
-            accessibilityLabel="Iniciar sesión en modo de vista previa"
+            accessibilityLabel="Iniciar sesión"
             className="mt-7 min-h-12 rounded-lg"
             disabled={isSubmitting}
             onPress={handleSubmit}
           >
             {isSubmitting ? <ButtonSpinner /> : null}
             <ButtonText className="font-sans-semibold">
-              {isSubmitting ? "Preparando tu espacio…" : "Iniciar sesión"}
+              {isSubmitting ? "Iniciando sesión…" : "Iniciar sesión"}
             </ButtonText>
           </Button>
-          <Text className="mt-5 text-center text-sm leading-5 text-muted-foreground">
-            Vista previa: cualquier correo válido y contraseña de 6 caracteres
-            te llevan al panel simulado.
-          </Text>
+
+          <View className="mt-3 items-center">
+            <AuthLink href="/(auth)/forgot-password" label="¿Olvidaste tu contraseña?" />
+            <AuthLink href="/(auth)/register" label="¿No tienes cuenta? Regístrate" />
+          </View>
         </View>
       </View>
     </KeyboardScreen>

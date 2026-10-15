@@ -2,58 +2,83 @@ import {
   createContext,
   use,
   useCallback,
+  useEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 
-export type MockClient = {
-  firstName: string;
-  fullName: string;
-  email: string;
-};
-
-export type MockSession = {
-  client: MockClient;
-};
-
-export type MockLoginInput = {
-  email: string;
-  password: string;
-};
+import {
+  restoreSession,
+  setSessionEndedListener,
+  signInWithPassword,
+  signOutSession,
+} from "@/lib/auth-session";
+import { queryClient } from "@/providers/query-client-provider";
+import type { AuthStatus, AuthUser } from "@/types/auth";
 
 type AuthSessionContextValue = {
-  session: MockSession | null;
-  signIn: (input: MockLoginInput) => Promise<void>;
-  signOut: () => void;
+  status: AuthStatus;
+  user: AuthUser | null;
+  /** True when the cold-start restore could not decide (offline); tokens were kept. */
+  restoreFailed: boolean;
+  /** Throws AuthError (see lib/auth-session.ts). */
+  signIn: (email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
+  retryRestore: () => Promise<void>;
 };
 
 const AuthSessionContext = createContext<AuthSessionContextValue | null>(null);
 
-const MOCK_CLIENT: MockClient = {
-  firstName: "Diana",
-  fullName: "Diana Cruz",
-  email: "diana@ejemplo.com",
-};
-
 export function AuthSessionProvider({ children }: { children: ReactNode }) {
-  const [session, setSession] = useState<MockSession | null>(null);
+  const [status, setStatus] = useState<AuthStatus>("loading");
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [restoreFailed, setRestoreFailed] = useState(false);
 
-  const signIn = useCallback(
-    async ({ email: _email, password: _password }: MockLoginInput) => {
-      await new Promise<void>((resolve) => setTimeout(resolve, 450));
-      setSession({ client: MOCK_CLIENT });
-    },
-    [],
-  );
-
-  const signOut = useCallback(() => {
-    setSession(null);
+  const endLocally = useCallback(() => {
+    setUser(null);
+    setStatus("signedOut");
+    queryClient.clear();
   }, []);
 
+  const applyRestored = useCallback((restored: AuthUser | null) => {
+    setUser(restored);
+    setStatus(restored ? "signedIn" : "signedOut");
+  }, []);
+
+  const applyRestoreFailed = useCallback(() => {
+    setUser(null);
+    setStatus("signedOut");
+    setRestoreFailed(true);
+  }, []);
+
+  const retryRestore = useCallback(async () => {
+    setRestoreFailed(false);
+    await restoreSession().then(applyRestored, applyRestoreFailed);
+  }, [applyRestored, applyRestoreFailed]);
+
+  useEffect(() => {
+    // Forced sign-out from the REST layer (refresh rejected, or a second 401).
+    setSessionEndedListener(endLocally);
+    void restoreSession().then(applyRestored, applyRestoreFailed);
+    return () => setSessionEndedListener(null);
+  }, [endLocally, applyRestored, applyRestoreFailed]);
+
+  const signIn = useCallback(async (email: string, password: string) => {
+    const signedIn = await signInWithPassword(email, password);
+    setRestoreFailed(false);
+    setUser(signedIn);
+    setStatus("signedIn");
+  }, []);
+
+  const signOut = useCallback(async () => {
+    await signOutSession();
+    endLocally();
+  }, [endLocally]);
+
   const value = useMemo(
-    () => ({ session, signIn, signOut }),
-    [session, signIn, signOut],
+    () => ({ status, user, restoreFailed, signIn, signOut, retryRestore }),
+    [status, user, restoreFailed, signIn, signOut, retryRestore],
   );
 
   return <AuthSessionContext value={value}>{children}</AuthSessionContext>;

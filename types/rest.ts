@@ -33,5 +33,11 @@ export interface ApiError {
 /** Returns the bearer token to attach to requests, or none to send no Authorization header. */
 export type TokenProvider = () => Promise<string | null | undefined> | string | null | undefined;
 
-/** Invoked when the API answers 401. */
-export type UnauthorizedHandler = (error: unknown) => void;
+/**
+ * Invoked when the API answers 401 on a non-auth endpoint. `retried` is true when the
+ * request was already replayed once. Resolve to `true` to replay the request (once).
+ */
+export type UnauthorizedHandler = (
+	error: unknown,
+	retried: boolean
+) => Promise<boolean | void> | boolean | void;

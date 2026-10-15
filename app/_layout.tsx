@@ -13,7 +13,10 @@ import { StatusBar } from "expo-status-bar";
 
 import { GluestackUIProvider } from "@/components/ui/gluestack-ui-provider";
 import { queryClient } from "@/providers/query-client-provider";
-import { AuthSessionProvider } from "@/features/auth/auth-session-context";
+import {
+  AuthSessionProvider,
+  useAuthSession,
+} from "@/features/auth/auth-session-context";
 import { PetPreviewProvider } from "@/features/pets/pet-preview-context";
 import { NO_GUTTER_STYLE, SCENE_GUTTER_STYLE } from "@/features/shared/layout";
 import { getNavigationTheme } from "@/features/shared/navigation-theme";
@@ -42,10 +45,6 @@ function RootNavigator() {
     Geist_700Bold,
   });
 
-  useEffect(() => {
-    if (loaded || error) SplashScreen.hideAsync();
-  }, [loaded, error]);
-
   // Keep the splash up until fonts resolve; on a load error, render with system fonts.
   if (!loaded && !error) return null;
 
@@ -58,15 +57,34 @@ function RootNavigator() {
               value={getNavigationTheme(colorScheme)}
             >
               <StatusBar style={colorScheme === "dark" ? "light" : "dark"} />
-              <Stack
-                screenOptions={{ headerShown: false, contentStyle: SCENE_GUTTER_STYLE }}
-              >
-                <Stack.Screen name="(client)" options={{ contentStyle: NO_GUTTER_STYLE }} />
-              </Stack>
+              <GuardedStack />
             </ThemeProvider>
           </GluestackUIProvider>
         </PetPreviewProvider>
       </AuthSessionProvider>
     </QueryClientProvider>
+  );
+}
+
+// Mounted only once fonts are ready. Holds the splash until the session restore resolves,
+// so neither group flashes before the status is known.
+function GuardedStack() {
+  const { status } = useAuthSession();
+
+  useEffect(() => {
+    if (status !== "loading") SplashScreen.hideAsync();
+  }, [status]);
+
+  if (status === "loading") return null;
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: SCENE_GUTTER_STYLE }}>
+      <Stack.Protected guard={status === "signedOut"}>
+        <Stack.Screen name="(auth)" options={{ contentStyle: NO_GUTTER_STYLE }} />
+      </Stack.Protected>
+      <Stack.Protected guard={status === "signedIn"}>
+        <Stack.Screen name="(client)" options={{ contentStyle: NO_GUTTER_STYLE }} />
+      </Stack.Protected>
+    </Stack>
   );
 }
