@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { z } from "zod";
 
-import { formatIsoDateInput } from "@/utils/date";
+import type { CreateAppointmentPayload } from "@/types/appointment.type";
+import { clinicNow, clinicStartIso, formatIsoDateInput } from "@/utils/date";
 
 export type AppointmentPicker = "pet" | "service" | "time" | null;
 
@@ -23,6 +24,15 @@ const appointmentFormSchema = z.object({
     .regex(/^\d{4}-\d{2}-\d{2}$/, "Usa el formato AAAA-MM-DD"),
   time: z.string().min(1, "Selecciona una hora"),
 });
+
+// No availability endpoint: fixed clinic-local slots; the API answers 409 when one is taken.
+const TIME_SLOTS = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"] as const;
+
+/** Slots for a date, without the ones already past when the date is today (clinic time). */
+export function availableTimeSlots(date: string): string[] {
+  const now = clinicNow();
+  return TIME_SLOTS.filter((slot) => date !== now.date || slot > now.time);
+}
 
 const initialValues: AppointmentFormValues = {
   petId: "",
@@ -48,9 +58,21 @@ export function useAppointmentForm() {
     updateValue("date", formatIsoDateInput(value));
   };
 
-  const submit = (): AppointmentFormValues | null => {
+  const submit = (): CreateAppointmentPayload | null => {
     const parsed = appointmentFormSchema.safeParse(values);
-    if (parsed.success) return parsed.data;
+    if (parsed.success) {
+      const { petId, serviceId, date, time } = parsed.data;
+      const start = clinicStartIso(date, time);
+      if (!start) {
+        setErrors({ date: "La fecha no es válida" });
+        return null;
+      }
+      if (Date.parse(start) <= Date.now()) {
+        setErrors({ date: "Elige una fecha y hora futuras" });
+        return null;
+      }
+      return { petId, serviceId, start };
+    }
 
     const nextErrors: AppointmentFormErrors = {};
     for (const issue of parsed.error.issues) {

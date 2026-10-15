@@ -24,11 +24,15 @@ export interface AppointmentPet {
 	species: string;
 }
 
+/** GET /services item. */
 export interface AppointmentService {
 	id: string;
 	name: string;
+	description?: string;
 	durationMinutes: number;
 	price: number;
+	category?: string;
+	active: boolean;
 }
 
 export interface AppointmentClient {

@@ -1,34 +1,40 @@
 import { router } from "expo-router";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { Alert, View } from "react-native";
 
 import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
-import {
-  appointmentServices,
-  appointmentTimeSlots,
-} from "@/features/appointments/appointment.mock";
-import { useAppointmentForm } from "@/features/appointments/use-appointment-form";
+import { availableTimeSlots, useAppointmentForm } from "@/features/appointments/use-appointment-form";
+import { useCreateAppointment, useServices } from "@/features/appointments/use-appointments";
+import { requestErrorMessage } from "@/features/auth/validate";
 import { usePets } from "@/features/pets/use-pets";
+import { parseApiError } from "@/lib/api-error";
 import { FormScreen } from "@/features/shared/components/form-screen";
 
 import { AppointmentSelectField } from "./appointment-select-field";
 
 export function NewAppointmentForm() {
   const { pets, isPending: petsLoading, isError: petsError } = usePets();
+  const {
+    services,
+    isPending: servicesLoading,
+    isError: servicesError,
+  } = useServices();
+  const { createAppointment, isPending: submitting } = useCreateAppointment();
   const form = useAppointmentForm();
+  const [formError, setFormError] = useState<string | null>(null);
 
   const petOptions = useMemo(
     () => pets.map((pet) => ({ label: pet.name, value: pet.id })),
     [pets],
   );
-  const serviceOptions = appointmentServices.map((service) => ({
-    label: service.label,
-    value: service.id,
-  }));
-  const timeOptions = appointmentTimeSlots.map((time) => ({
+  const serviceOptions = useMemo(
+    () => services.map((service) => ({ label: service.name, value: service.id })),
+    [services],
+  );
+  const timeOptions = availableTimeSlots(form.values.date).map((time) => ({
     label: time,
     value: time,
   }));
@@ -43,19 +49,27 @@ export function NewAppointmentForm() {
     if (form.activePicker === "time") form.updateValue("time", value);
   };
 
-  const requestAppointment = () => {
-    const appointment = form.submit();
-    if (!appointment) return;
+  const requestAppointment = async () => {
+    if (submitting) return;
+    const payload = form.submit();
+    if (!payload) return;
 
-    const pet = petOptions.find((option) => option.value === appointment.petId);
-    const service = serviceOptions.find(
-      (option) => option.value === appointment.serviceId,
-    );
+    setFormError(null);
+    try {
+      await createAppointment(payload);
+    } catch (error) {
+      const { status } = parseApiError(error);
+      if (status === 409) setFormError("Horario no disponible. Elige otra hora.");
+      else if (status === 404) setFormError("No encontramos la mascota o el servicio seleccionado.");
+      else if (status === 400) setFormError("La fecha o la hora no son válidas.");
+      else setFormError(requestErrorMessage(status));
+      return;
+    }
     Alert.alert(
-      "Solicitud enviada",
-      `Prepararemos una cita para ${pet?.label ?? "tu mascota"} por ${
-        service?.label.toLowerCase() ?? "el servicio seleccionado"
-      } el ${appointment.date} a las ${appointment.time}.`,
+      "Cita solicitada",
+      `Registramos la cita de ${selectedPet?.label ?? "tu mascota"} por ${
+        selectedService?.label.toLowerCase() ?? "el servicio seleccionado"
+      } el ${form.values.date} a las ${form.values.time}.`,
       [{ text: "Ver mis citas", onPress: () => router.back() }],
     );
   };
@@ -109,10 +123,19 @@ export function NewAppointmentForm() {
           value={selectedPet?.label ?? ""}
         />
         <AppointmentSelectField
+          disabled={serviceOptions.length === 0}
           error={form.errors.serviceId}
           label="Servicio *"
           onPress={() => form.setActivePicker("service")}
-          placeholder="Selecciona un servicio"
+          placeholder={
+            servicesLoading
+              ? "Cargando servicios..."
+              : servicesError
+                ? "No pudimos cargar los servicios"
+                : serviceOptions.length === 0
+                  ? "No hay servicios disponibles"
+                  : "Selecciona un servicio"
+          }
           value={selectedService?.label ?? ""}
         />
         <View className="mt-5">
@@ -142,8 +165,19 @@ export function NewAppointmentForm() {
           value={form.values.time}
         />
 
-        <Button className="mt-8 min-h-12 rounded-lg" onPress={requestAppointment}>
-          <ButtonText className="font-sans-semibold">Solicitar cita</ButtonText>
+        {formError ? (
+          <Text accessibilityRole="alert" className="mt-5 text-sm text-destructive">
+            {formError}
+          </Text>
+        ) : null}
+        <Button
+          className="mt-8 min-h-12 rounded-lg"
+          disabled={submitting}
+          onPress={requestAppointment}
+        >
+          <ButtonText className="font-sans-semibold">
+            {submitting ? "Enviando..." : "Solicitar cita"}
+          </ButtonText>
         </Button>
       <OptionPicker
         onClose={() => form.setActivePicker(null)}

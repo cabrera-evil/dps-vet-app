@@ -6,6 +6,8 @@ import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
 import { Text } from "@/components/ui/text";
 import { useAuthSession } from "@/features/auth/auth-session-context";
 import { dashboardMock } from "@/features/dashboard/dashboard.mock";
+import { APPOINTMENT_STATUS_LABEL, useAppointmentViews } from "@/features/appointments/use-appointments";
+import { formatClinicLongDate, formatClinicTime } from "@/utils/date";
 import { useThemeMode } from "@/features/shared/theme-mode";
 import { petAccent, usePets } from "@/features/pets/use-pets";
 import { SCREEN_GUTTER } from "@/features/shared/layout";
@@ -17,7 +19,12 @@ import { PetSummaryCard } from "./pet-summary-card";
 export function ClientDashboard() {
   const { user } = useAuthSession();
   const { pets, isPending, isError, refetch } = usePets();
-  const appointment = dashboardMock.nextAppointment;
+  const {
+    nextAppointment: appointment,
+    isPending: appointmentLoading,
+    isError: appointmentError,
+    refetch: refetchAppointments,
+  } = useAppointmentViews();
   const { scheme, setMode } = useThemeMode();
   const isDark = scheme === "dark";
 
@@ -48,11 +55,34 @@ export function ClientDashboard() {
       </View>
 
       <DashboardSection title="Próxima cita">
+        {appointmentLoading ? (
+          <ActivityIndicator accessibilityLabel="Cargando próxima cita" />
+        ) : appointmentError ? (
+          <Pressable
+            accessibilityRole="button"
+            className="min-h-11 justify-center rounded-xl border border-border bg-card p-4 active:opacity-70"
+            onPress={() => refetchAppointments()}
+          >
+            <Text className="text-center text-muted-foreground">
+              No pudimos cargar tu próxima cita. Toca para reintentar.
+            </Text>
+          </Pressable>
+        ) : !appointment ? (
+          <Pressable
+            accessibilityRole="button"
+            className="min-h-11 items-center justify-center rounded-xl border border-dashed border-border bg-card p-6 active:opacity-70"
+            onPress={() => router.push("/(client)/appointments/new")}
+          >
+            <Text className="text-center text-muted-foreground">
+              No tienes citas próximas. Toca para agendar una.
+            </Text>
+          </Pressable>
+        ) : (
         <View className="overflow-hidden rounded-xl bg-primary p-5">
           <View className="flex-row items-center justify-between">
             <View className="rounded-full bg-primary-foreground/15 px-3 py-1">
               <Text className="text-xs font-sans-semibold text-primary-foreground">
-                CONFIRMADA
+                {APPOINTMENT_STATUS_LABEL[appointment.status]}
               </Text>
             </View>
             <DecorativeIcon
@@ -65,21 +95,22 @@ export function ClientDashboard() {
             {appointment.petName}
           </Text>
           <Text className="mt-1 text-base text-primary-foreground/90">
-            {appointment.service}
+            {appointment.serviceName}
           </Text>
           <View className="mt-5 flex-row gap-2">
             <View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
               <Text className="text-sm font-sans-medium text-primary-foreground">
-                {appointment.dateLabel}
+                {formatClinicLongDate(appointment.start)}
               </Text>
             </View>
             <View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
               <Text className="text-sm font-sans-medium text-primary-foreground">
-                {appointment.timeLabel}
+                {formatClinicTime(appointment.start)}
               </Text>
             </View>
           </View>
         </View>
+        )}
       </DashboardSection>
 
       <DashboardSection
