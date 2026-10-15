@@ -2,13 +2,18 @@ import { CLINIC_TIME_ZONE } from '@/constants/defaults';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
-export function formatIsoDateInput(value: string): string {
-	const digits = value.replace(/\D/g, '').slice(0, 8);
-	const year = digits.slice(0, 4);
-	const month = digits.slice(4, 6);
-	const day = digits.slice(6, 8);
+/** `YYYY-MM-DD` from the LOCAL calendar fields of a Date (no UTC shift, unlike toISOString). */
+export function toIsoDate(date: Date): string {
+	return format(date, 'yyyy-MM-dd');
+}
 
-	return [year, month, day].filter(Boolean).join('-');
+/** Local-midnight Date for a `YYYY-MM-DD` string; undefined when empty or not a real date. */
+export function fromIsoDate(value: string): Date | undefined {
+	const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+	if (!match) return undefined;
+	const [year, month, day] = match.slice(1).map(Number);
+	const date = new Date(year, month - 1, day);
+	return date.getMonth() === month - 1 ? date : undefined;
 }
 
 export function formatDate(value: string) {

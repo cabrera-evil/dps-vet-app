@@ -10,7 +10,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
-import { formatIsoDateInput } from "@/utils/date";
+import { DateField } from "@/components/custom/date-field";
 import { AppointmentSelectField } from "@/features/appointments/components/appointment-select-field";
 import { useBreeds, useCreatePet, useSpecies } from "@/features/pets/use-pets";
 import { parseApiError } from "@/lib/api-error";
@@ -201,19 +201,14 @@ export function NewPetForm() {
 
         <View className="mt-5">
           <FieldLabel>Fecha de nacimiento *</FieldLabel>
-          <Input className={`min-h-12 ${errors.birthDate ? "border-destructive" : ""}`}>
-            <InputField
-              accessibilityLabel="Fecha de nacimiento"
-              keyboardType="numbers-and-punctuation"
-              maxLength={10}
-              placeholder="AAAA-MM-DD"
-              value={values.birthDate}
-              onChangeText={(value) =>
-                updateValue("birthDate", formatIsoDateInput(value))
-              }
-            />
-          </Input>
-          <Text className="mt-2 text-sm text-muted-foreground">Ejemplo: 2023-05-14</Text>
+          <DateField
+            accessibilityLabel="Fecha de nacimiento"
+            invalid={!!errors.birthDate}
+            maximumDate={new Date()}
+            onChange={(value) => updateValue("birthDate", value)}
+            placeholder="Selecciona la fecha"
+            value={values.birthDate}
+          />
           <FieldError message={errors.birthDate} />
         </View>
 

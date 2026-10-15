@@ -5,13 +5,14 @@ import { View } from "react-native";
 import { useNotice } from "@/hooks/use-notice";
 import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
-import { Input, InputField } from "@/components/ui/input";
+import { DateField } from "@/components/custom/date-field";
 import { Text } from "@/components/ui/text";
 import { availableTimeSlots, useAppointmentForm } from "@/features/appointments/use-appointment-form";
 import { useCreateAppointment, useServices } from "@/features/appointments/use-appointments";
 import { requestErrorMessage } from "@/features/auth/validate";
 import { usePets } from "@/features/pets/use-pets";
 import { parseApiError } from "@/lib/api-error";
+import { clinicNow, fromIsoDate } from "@/utils/date";
 import { FormScreen } from "@/features/shared/components/form-screen";
 
 import { AppointmentSelectField } from "./appointment-select-field";
@@ -142,17 +143,14 @@ export function NewAppointmentForm() {
         />
         <View className="mt-5">
           <Text className="mb-2 text-sm font-sans-semibold text-foreground">Fecha *</Text>
-          <Input className={`min-h-12 ${form.errors.date ? "border-destructive" : ""}`}>
-            <InputField
-              accessibilityLabel="Fecha"
-              keyboardType="numbers-and-punctuation"
-              maxLength={10}
-              placeholder="AAAA-MM-DD"
-              value={form.values.date}
-              onChangeText={form.updateDate}
-            />
-          </Input>
-          <Text className="mt-2 text-sm text-muted-foreground">Ejemplo: 2026-10-20</Text>
+          <DateField
+            accessibilityLabel="Fecha"
+            invalid={!!form.errors.date}
+            minimumDate={fromIsoDate(clinicNow().date)}
+            onChange={(value) => form.updateValue("date", value)}
+            placeholder="Selecciona la fecha"
+            value={form.values.date}
+          />
           {form.errors.date ? (
             <Text accessibilityRole="alert" className="mt-2 text-sm text-destructive">
               {form.errors.date}

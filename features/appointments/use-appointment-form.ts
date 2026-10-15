@@ -2,7 +2,7 @@ import { useState } from "react";
 import { z } from "zod";
 
 import type { CreateAppointmentPayload } from "@/types/appointment.type";
-import { clinicNow, clinicStartIso, formatIsoDateInput } from "@/utils/date";
+import { clinicNow, clinicStartIso } from "@/utils/date";
 
 export type AppointmentPicker = "pet" | "service" | "time" | null;
 
@@ -54,10 +54,6 @@ export function useAppointmentForm() {
     setErrors((current) => ({ ...current, [field]: undefined }));
   };
 
-  const updateDate = (value: string) => {
-    updateValue("date", formatIsoDateInput(value));
-  };
-
   const submit = (): CreateAppointmentPayload | null => {
     const parsed = appointmentFormSchema.safeParse(values);
     if (parsed.success) {
@@ -97,7 +93,6 @@ export function useAppointmentForm() {
     reset,
     setActivePicker,
     submit,
-    updateDate,
     updateValue,
     values,
   };
