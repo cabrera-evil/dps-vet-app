@@ -3,6 +3,7 @@ import { router } from "expo-router";
 import { useMemo, useState } from "react";
 import { Alert, Pressable, ScrollView, View } from "react-native";
 
+import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
@@ -15,8 +16,6 @@ import {
   petSexOptions,
 } from "@/features/pets/pet-catalog.mock";
 import { usePetPreview } from "@/features/pets/pet-preview-context";
-
-import { OptionPicker } from "./option-picker";
 
 const newPetSchema = z
   .object({

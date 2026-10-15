@@ -4,6 +4,10 @@ export default function ClientLayout() {
   return (
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="(tabs)" />
+      <Stack.Screen
+        name="appointments/new"
+        options={{ animation: "slide_from_right" }}
+      />
       <Stack.Screen name="pets/new" options={{ animation: "slide_from_right" }} />
     </Stack>
   );

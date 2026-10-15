@@ -92,9 +92,13 @@ export function ClientDashboard() {
           {dashboardMock.quickActions.map((action) => (
             <Pressable
               key={action.id}
-              accessibilityLabel={`${action.label}, próximamente`}
+              accessibilityLabel={action.label}
               className="flex-row items-center rounded-2xl border border-border bg-card p-4"
-              onPress={() => Alert.alert("Próximamente", action.description)}
+              onPress={() =>
+                action.id === "book"
+                  ? router.push("/(client)/appointments/new")
+                  : Alert.alert("Próximamente", action.description)
+              }
             >
               <View className="h-10 w-10 items-center justify-center rounded-xl bg-secondary">
                 <Text className="text-lg">

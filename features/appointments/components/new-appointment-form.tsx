@@ -1,0 +1,156 @@
+import { router } from "expo-router";
+import { useMemo } from "react";
+import { Alert, Pressable, ScrollView, View } from "react-native";
+
+import { OptionPicker } from "@/components/option-picker";
+import { Button, ButtonText } from "@/components/ui/button";
+import { Input, InputField } from "@/components/ui/input";
+import { Text } from "@/components/ui/text";
+import {
+  appointmentServices,
+  appointmentTimeSlots,
+} from "@/features/appointments/appointment.mock";
+import { useAppointmentForm } from "@/features/appointments/use-appointment-form";
+import { usePetPreview } from "@/features/pets/pet-preview-context";
+
+import { AppointmentSelectField } from "./appointment-select-field";
+
+export function NewAppointmentForm() {
+  const { pets } = usePetPreview();
+  const form = useAppointmentForm();
+
+  const petOptions = useMemo(
+    () => pets.map((pet) => ({ label: pet.name, value: pet.id })),
+    [pets],
+  );
+  const serviceOptions = appointmentServices.map((service) => ({
+    label: service.label,
+    value: service.id,
+  }));
+  const timeOptions = appointmentTimeSlots.map((time) => ({
+    label: time,
+    value: time,
+  }));
+  const selectedPet = petOptions.find((pet) => pet.value === form.values.petId);
+  const selectedService = serviceOptions.find(
+    (service) => service.value === form.values.serviceId,
+  );
+
+  const selectOption = (value: string) => {
+    if (form.activePicker === "pet") form.updateValue("petId", value);
+    if (form.activePicker === "service") form.updateValue("serviceId", value);
+    if (form.activePicker === "time") form.updateValue("time", value);
+  };
+
+  const requestAppointment = () => {
+    const appointment = form.submit();
+    if (!appointment) return;
+
+    const pet = petOptions.find((option) => option.value === appointment.petId);
+    const service = serviceOptions.find(
+      (option) => option.value === appointment.serviceId,
+    );
+    Alert.alert(
+      "Solicitud enviada",
+      `Prepararemos una cita para ${pet?.label ?? "tu mascota"} por ${
+        service?.label.toLowerCase() ?? "el servicio seleccionado"
+      } el ${appointment.date} a las ${appointment.time}.`,
+      [{ text: "Ver mis citas", onPress: () => router.back() }],
+    );
+  };
+
+  const pickerOptions =
+    form.activePicker === "pet"
+      ? petOptions
+      : form.activePicker === "service"
+        ? serviceOptions
+        : timeOptions;
+  const pickerTitle =
+    form.activePicker === "pet"
+      ? "Elige una mascota"
+      : form.activePicker === "service"
+        ? "Elige un servicio"
+        : "Elige una hora";
+  const selectedPickerValue =
+    form.activePicker === "pet"
+      ? form.values.petId
+      : form.activePicker === "service"
+        ? form.values.serviceId
+        : form.values.time;
+
+  return (
+    <View className="flex-1 bg-background">
+      <View className="flex-row items-center border-b border-border bg-card px-6 py-4">
+        <Pressable accessibilityLabel="Volver a citas" hitSlop={12} onPress={() => router.back()}>
+          <Text className="text-2xl text-foreground">‹</Text>
+        </Pressable>
+        <View className="ml-4 flex-1">
+          <Text className="font-heading text-xl text-foreground">Nueva cita</Text>
+          <Text className="mt-1 text-sm text-muted-foreground">
+            Agenda una cita para una de tus mascotas.
+          </Text>
+        </View>
+      </View>
+
+      <ScrollView contentContainerClassName="px-6 pb-12 pt-6" keyboardShouldPersistTaps="handled">
+        <View className="rounded-2xl bg-secondary/50 p-4">
+          <Text className="font-semibold text-secondary-foreground">Detalles de la cita</Text>
+          <Text className="mt-1 text-sm leading-5 text-secondary-foreground">
+            Selecciona la mascota, el servicio y el horario que prefieras.
+          </Text>
+        </View>
+
+        <AppointmentSelectField
+          error={form.errors.petId}
+          label="Mascota *"
+          onPress={() => form.setActivePicker("pet")}
+          placeholder="Selecciona una mascota"
+          value={selectedPet?.label ?? ""}
+        />
+        <AppointmentSelectField
+          error={form.errors.serviceId}
+          label="Servicio *"
+          onPress={() => form.setActivePicker("service")}
+          placeholder="Selecciona un servicio"
+          value={selectedService?.label ?? ""}
+        />
+        <View className="mt-5">
+          <Text className="mb-2 text-sm font-semibold text-foreground">Fecha *</Text>
+          <Input className={form.errors.date ? "border-destructive" : ""}>
+            <InputField
+              keyboardType="numbers-and-punctuation"
+              maxLength={10}
+              placeholder="AAAA-MM-DD"
+              value={form.values.date}
+              onChangeText={form.updateDate}
+            />
+          </Input>
+          <Text className="mt-2 text-xs text-muted-foreground">Ejemplo: 2026-10-20</Text>
+          {form.errors.date ? (
+            <Text className="mt-2 text-sm text-destructive">{form.errors.date}</Text>
+          ) : null}
+        </View>
+        <AppointmentSelectField
+          error={form.errors.time}
+          label="Hora *"
+          onPress={() => form.setActivePicker("time")}
+          placeholder="Selecciona una hora"
+          value={form.values.time}
+        />
+
+        <Button className="mt-8 min-h-13 rounded-2xl" onPress={requestAppointment}>
+          <ButtonText className="font-semibold">Solicitar cita</ButtonText>
+        </Button>
+      </ScrollView>
+
+      <OptionPicker
+        onClose={() => form.setActivePicker(null)}
+        onSelect={selectOption}
+        options={pickerOptions}
+        selectedValue={selectedPickerValue}
+        title={pickerTitle}
+        visible={form.activePicker !== null}
+      />
+    </View>
+  );
+}
