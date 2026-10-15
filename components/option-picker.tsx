@@ -1,5 +1,8 @@
+import { Check, X } from "lucide-react-native";
 import { Modal, Pressable, ScrollView, View } from "react-native";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
 import { Text } from "@/components/ui/text";
 
 type PickerOption = {
@@ -24,15 +27,42 @@ export function OptionPicker({
   onClose,
   onSelect,
 }: OptionPickerProps) {
+  const insets = useSafeAreaInsets();
+
   return (
-    <Modal animationType="slide" onRequestClose={onClose} transparent visible={visible}>
-      <View className="flex-1 justify-end bg-black/35">
-        <Pressable accessibilityLabel="Cerrar selector" className="flex-1" onPress={onClose} />
-        <View className="max-h-[70%] rounded-t-3xl bg-card px-6 pb-10 pt-5">
-          <View className="mb-5 flex-row items-center justify-between">
-            <Text className="font-heading text-xl text-foreground">{title}</Text>
-            <Pressable accessibilityLabel="Cerrar" hitSlop={12} onPress={onClose}>
-              <Text className="text-xl text-muted-foreground">×</Text>
+    <Modal
+      accessibilityViewIsModal
+      animationType="slide"
+      onRequestClose={onClose}
+      transparent
+      visible={visible}
+    >
+      <View className="flex-1 justify-end bg-black/50">
+        <Pressable
+          accessibilityLabel="Cerrar selector"
+          accessibilityRole="button"
+          className="flex-1"
+          onPress={onClose}
+        />
+        <View
+          className="max-h-[70%] rounded-t-2xl bg-card px-6 pt-4"
+          style={{ paddingBottom: insets.bottom + 16 }}
+        >
+          <View className="mb-4 flex-row items-center justify-between">
+            <Text accessibilityRole="header" className="flex-1 font-heading text-xl text-foreground">
+              {title}
+            </Text>
+            <Pressable
+              accessibilityLabel="Cerrar"
+              accessibilityRole="button"
+              className="h-11 w-11 items-center justify-center rounded-full active:bg-muted"
+              onPress={onClose}
+            >
+              <DecorativeIcon
+                as={X}
+                className="text-muted-foreground"
+                size="xl"
+              />
             </Pressable>
           </View>
           <ScrollView showsVerticalScrollIndicator={false}>
@@ -43,7 +73,7 @@ export function OptionPicker({
                   key={option.value}
                   accessibilityRole="button"
                   accessibilityState={{ selected }}
-                  className={`mb-2 min-h-13 justify-center rounded-2xl px-4 ${
+                  className={`mb-2 min-h-12 flex-row items-center justify-between rounded-lg px-4 py-3 active:opacity-70 ${
                     selected ? "bg-secondary" : "bg-background"
                   }`}
                   onPress={() => {
@@ -52,12 +82,19 @@ export function OptionPicker({
                   }}
                 >
                   <Text
-                    className={`font-semibold ${
+                    className={`flex-1 font-sans-semibold ${
                       selected ? "text-secondary-foreground" : "text-foreground"
                     }`}
                   >
                     {option.label}
                   </Text>
+                  {selected ? (
+                    <DecorativeIcon
+                      as={Check}
+                      className="text-primary"
+                      size="lg"
+                    />
+                  ) : null}
                 </Pressable>
               );
             })}

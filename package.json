@@ -3,8 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "dependencies": {
-    "@expo-google-fonts/nunito-sans": "^0.4.2",
-    "@expo-google-fonts/varela-round": "^0.4.1",
+    "@expo-google-fonts/geist": "^0.4.2",
     "@expo/html-elements": "^0.12.5",
     "@expo/ui": "~57.0.20",
     "@gluestack-ui/core": "^5.0.15",
@@ -28,6 +27,7 @@
     "expo-symbols": "~57.0.3",
     "expo-system-ui": "~57.0.4",
     "expo-web-browser": "~57.0.3",
+    "lucide-react-native": "^1.56.0",
     "nativewind": "5.0.0-rc.0",
     "react": "19.2.3",
     "react-aria": "^3.52.1",

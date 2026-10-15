@@ -1,6 +1,6 @@
 import { router } from "expo-router";
 import { useMemo } from "react";
-import { Alert, Pressable, ScrollView, View } from "react-native";
+import { Alert, View } from "react-native";
 
 import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import {
 } from "@/features/appointments/appointment.mock";
 import { useAppointmentForm } from "@/features/appointments/use-appointment-form";
 import { usePetPreview } from "@/features/pets/pet-preview-context";
+import { FormScreen } from "@/features/shared/components/form-screen";
 
 import { AppointmentSelectField } from "./appointment-select-field";
 
@@ -79,22 +80,13 @@ export function NewAppointmentForm() {
         : form.values.time;
 
   return (
-    <View className="flex-1 bg-background">
-      <View className="flex-row items-center border-b border-border bg-card px-6 py-4">
-        <Pressable accessibilityLabel="Volver a citas" hitSlop={12} onPress={() => router.back()}>
-          <Text className="text-2xl text-foreground">‹</Text>
-        </Pressable>
-        <View className="ml-4 flex-1">
-          <Text className="font-heading text-xl text-foreground">Nueva cita</Text>
-          <Text className="mt-1 text-sm text-muted-foreground">
-            Agenda una cita para una de tus mascotas.
-          </Text>
-        </View>
-      </View>
-
-      <ScrollView contentContainerClassName="px-6 pb-12 pt-6" keyboardShouldPersistTaps="handled">
-        <View className="rounded-2xl bg-secondary/50 p-4">
-          <Text className="font-semibold text-secondary-foreground">Detalles de la cita</Text>
+    <FormScreen
+      backLabel="Volver a citas"
+      subtitle="Agenda una cita para una de tus mascotas."
+      title="Nueva cita"
+    >
+        <View className="rounded-xl border border-border bg-secondary p-4">
+          <Text className="font-sans-semibold text-secondary-foreground">Detalles de la cita</Text>
           <Text className="mt-1 text-sm leading-5 text-secondary-foreground">
             Selecciona la mascota, el servicio y el horario que prefieras.
           </Text>
@@ -115,9 +107,10 @@ export function NewAppointmentForm() {
           value={selectedService?.label ?? ""}
         />
         <View className="mt-5">
-          <Text className="mb-2 text-sm font-semibold text-foreground">Fecha *</Text>
-          <Input className={form.errors.date ? "border-destructive" : ""}>
+          <Text className="mb-2 text-sm font-sans-semibold text-foreground">Fecha *</Text>
+          <Input className={`min-h-12 ${form.errors.date ? "border-destructive" : ""}`}>
             <InputField
+              accessibilityLabel="Fecha"
               keyboardType="numbers-and-punctuation"
               maxLength={10}
               placeholder="AAAA-MM-DD"
@@ -125,9 +118,11 @@ export function NewAppointmentForm() {
               onChangeText={form.updateDate}
             />
           </Input>
-          <Text className="mt-2 text-xs text-muted-foreground">Ejemplo: 2026-10-20</Text>
+          <Text className="mt-2 text-sm text-muted-foreground">Ejemplo: 2026-10-20</Text>
           {form.errors.date ? (
-            <Text className="mt-2 text-sm text-destructive">{form.errors.date}</Text>
+            <Text accessibilityRole="alert" className="mt-2 text-sm text-destructive">
+              {form.errors.date}
+            </Text>
           ) : null}
         </View>
         <AppointmentSelectField
@@ -138,11 +133,9 @@ export function NewAppointmentForm() {
           value={form.values.time}
         />
 
-        <Button className="mt-8 min-h-13 rounded-2xl" onPress={requestAppointment}>
-          <ButtonText className="font-semibold">Solicitar cita</ButtonText>
+        <Button className="mt-8 min-h-12 rounded-lg" onPress={requestAppointment}>
+          <ButtonText className="font-sans-semibold">Solicitar cita</ButtonText>
         </Button>
-      </ScrollView>
-
       <OptionPicker
         onClose={() => form.setActivePicker(null)}
         onSelect={selectOption}
@@ -151,6 +144,6 @@ export function NewAppointmentForm() {
         title={pickerTitle}
         visible={form.activePicker !== null}
       />
-    </View>
+    </FormScreen>
   );
 }

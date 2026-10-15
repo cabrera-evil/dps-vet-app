@@ -2,19 +2,20 @@ import { View } from "react-native";
 
 import { Text } from "@/components/ui/text";
 import type { MockPet } from "@/features/dashboard/dashboard.mock";
+import { PetSpeciesIcon } from "@/features/pets/components/pet-species-icon";
 
 export function PetSummaryCard({ pet }: { pet: MockPet }) {
   const accentClassName =
     pet.accent === "teal"
       ? "bg-secondary text-secondary-foreground"
-      : "bg-orange-100 text-orange-800";
+      : "bg-accent text-accent-foreground";
 
   return (
-    <View className="mr-3 w-40 rounded-2xl border border-border bg-card p-4">
+    <View className="mr-3 w-40 rounded-xl border border-border bg-card p-4">
       <View
-        className={`h-11 w-11 items-center justify-center rounded-2xl ${accentClassName}`}
+        className={`h-12 w-12 items-center justify-center rounded-lg ${accentClassName}`}
       >
-        <Text className="text-lg">{pet.species === "Gato" ? "🐈" : "🐕"}</Text>
+        <PetSpeciesIcon species={pet.species} />
       </View>
       <Text className="mt-4 font-heading text-lg text-foreground">
         {pet.name}

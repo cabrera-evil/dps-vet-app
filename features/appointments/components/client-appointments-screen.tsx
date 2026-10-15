@@ -15,8 +15,8 @@ export function ClientAppointmentsScreen() {
       onAction={() => router.push("/(client)/appointments/new")}
       title="Mis citas"
     >
-      <View className="rounded-3xl bg-primary p-5">
-        <Text className="text-sm font-semibold text-primary-foreground">
+      <View className="rounded-xl bg-primary p-5">
+        <Text className="text-sm font-sans-semibold text-primary-foreground">
           PRÓXIMA VISITA
         </Text>
         <Text className="mt-4 font-heading text-2xl text-primary-foreground">
@@ -25,8 +25,8 @@ export function ClientAppointmentsScreen() {
         <Text className="mt-1 text-base text-primary-foreground/90">
           {appointment.service}
         </Text>
-        <View className="mt-5 rounded-xl bg-white/15 p-3">
-          <Text className="text-sm font-medium text-primary-foreground">
+        <View className="mt-5 rounded-lg bg-primary-foreground/15 p-3">
+          <Text className="text-sm font-sans-medium text-primary-foreground">
             {appointment.dateLabel} · {appointment.timeLabel}
           </Text>
         </View>
