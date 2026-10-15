@@ -2,6 +2,15 @@ import { CLINIC_TIME_ZONE } from '@/constants/defaults';
 import { format, parseISO } from 'date-fns';
 import { es } from 'date-fns/locale';
 
+export function formatIsoDateInput(value: string): string {
+	const digits = value.replace(/\D/g, '').slice(0, 8);
+	const year = digits.slice(0, 4);
+	const month = digits.slice(4, 6);
+	const day = digits.slice(6, 8);
+
+	return [year, month, day].filter(Boolean).join('-');
+}
+
 export function formatDate(value: string) {
 	return format(parseISO(value), 'dd MMM yyyy', { locale: es });
 }

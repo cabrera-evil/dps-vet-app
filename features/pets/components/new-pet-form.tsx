@@ -8,6 +8,7 @@ import { Input, InputField } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
+import { formatIsoDateInput } from "@/utils/date";
 import {
   getBreedsForSpecies,
   petCatalog,
@@ -197,7 +198,9 @@ export function NewPetForm() {
               maxLength={10}
               placeholder="AAAA-MM-DD"
               value={values.birthDate}
-              onChangeText={(value) => updateValue("birthDate", value)}
+              onChangeText={(value) =>
+                updateValue("birthDate", formatIsoDateInput(value))
+              }
             />
           </Input>
           <Text className="mt-2 text-xs text-muted-foreground">Ejemplo: 2023-05-14</Text>
