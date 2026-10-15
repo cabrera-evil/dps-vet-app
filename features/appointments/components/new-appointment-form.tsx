@@ -1,7 +1,8 @@
 import { router } from "expo-router";
 import { useMemo, useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
+import { useNotice } from "@/hooks/use-notice";
 import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
@@ -24,6 +25,7 @@ export function NewAppointmentForm() {
   } = useServices();
   const { createAppointment, isPending: submitting } = useCreateAppointment();
   const form = useAppointmentForm();
+  const notify = useNotice();
   const [formError, setFormError] = useState<string | null>(null);
 
   const petOptions = useMemo(
@@ -65,13 +67,13 @@ export function NewAppointmentForm() {
       else setFormError(requestErrorMessage(status));
       return;
     }
-    Alert.alert(
+    notify(
       "Cita solicitada",
       `Registramos la cita de ${selectedPet?.label ?? "tu mascota"} por ${
         selectedService?.label.toLowerCase() ?? "el servicio seleccionado"
       } el ${form.values.date} a las ${form.values.time}.`,
-      [{ text: "Ver mis citas", onPress: () => router.back() }],
     );
+    router.back();
   };
 
   const pickerOptions =

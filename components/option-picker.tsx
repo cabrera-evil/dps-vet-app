@@ -1,9 +1,17 @@
-import { Check, X } from "lucide-react-native";
-import { Modal, Pressable, ScrollView, View } from "react-native";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { Check } from "lucide-react-native";
 
-import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
+import {
+  Actionsheet,
+  ActionsheetBackdrop,
+  ActionsheetContent,
+  ActionsheetDragIndicator,
+  ActionsheetDragIndicatorWrapper,
+  ActionsheetItem,
+  ActionsheetItemText,
+  ActionsheetScrollView,
+} from "@/components/ui/actionsheet";
 import { Text } from "@/components/ui/text";
+import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
 
 type PickerOption = {
   label: string;
@@ -27,80 +35,45 @@ export function OptionPicker({
   onClose,
   onSelect,
 }: OptionPickerProps) {
-  const insets = useSafeAreaInsets();
-
   return (
-    <Modal
-      accessibilityViewIsModal
-      animationType="slide"
-      onRequestClose={onClose}
-      transparent
-      visible={visible}
-    >
-      <View className="flex-1 justify-end bg-black/50">
-        <Pressable
-          accessibilityLabel="Cerrar selector"
-          accessibilityRole="button"
-          className="flex-1"
-          onPress={onClose}
-        />
-        <View
-          className="max-h-[70%] rounded-t-2xl bg-card px-6 pt-4"
-          style={{ paddingBottom: insets.bottom + 16 }}
-        >
-          <View className="mb-4 flex-row items-center justify-between">
-            <Text accessibilityRole="header" className="flex-1 font-heading text-xl text-foreground">
-              {title}
-            </Text>
-            <Pressable
-              accessibilityLabel="Cerrar"
-              accessibilityRole="button"
-              className="h-11 w-11 items-center justify-center rounded-full active:bg-muted"
-              onPress={onClose}
-            >
-              <DecorativeIcon
-                as={X}
-                className="text-muted-foreground"
-                size="xl"
-              />
-            </Pressable>
-          </View>
-          <ScrollView showsVerticalScrollIndicator={false}>
-            {options.map((option) => {
-              const selected = option.value === selectedValue;
-              return (
-                <Pressable
-                  key={option.value}
-                  accessibilityRole="button"
-                  accessibilityState={{ selected }}
-                  className={`mb-2 min-h-12 flex-row items-center justify-between rounded-lg px-4 py-3 active:opacity-70 ${
-                    selected ? "bg-secondary" : "bg-background"
+    <Actionsheet isOpen={visible} onClose={onClose}>
+      <ActionsheetBackdrop accessibilityLabel="Cerrar selector" />
+      <ActionsheetContent className="max-h-[70%]">
+        <ActionsheetDragIndicatorWrapper>
+          <ActionsheetDragIndicator />
+        </ActionsheetDragIndicatorWrapper>
+        <Text accessibilityRole="header" className="w-full px-3 py-2 font-heading text-xl text-foreground">
+          {title}
+        </Text>
+        <ActionsheetScrollView showsVerticalScrollIndicator={false}>
+          {options.map((option) => {
+            const selected = option.value === selectedValue;
+            return (
+              <ActionsheetItem
+                key={option.value}
+                accessibilityRole="button"
+                accessibilityState={{ selected }}
+                className={`min-h-12 justify-between px-4 ${selected ? "bg-secondary" : ""}`}
+                onPress={() => {
+                  onSelect(option.value);
+                  onClose();
+                }}
+              >
+                <ActionsheetItemText
+                  className={`flex-1 text-base font-sans-semibold ${
+                    selected ? "text-secondary-foreground" : "text-foreground"
                   }`}
-                  onPress={() => {
-                    onSelect(option.value);
-                    onClose();
-                  }}
                 >
-                  <Text
-                    className={`flex-1 font-sans-semibold ${
-                      selected ? "text-secondary-foreground" : "text-foreground"
-                    }`}
-                  >
-                    {option.label}
-                  </Text>
-                  {selected ? (
-                    <DecorativeIcon
-                      as={Check}
-                      className="text-primary"
-                      size="lg"
-                    />
-                  ) : null}
-                </Pressable>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
+                  {option.label}
+                </ActionsheetItemText>
+                {selected ? (
+                  <DecorativeIcon as={Check} className="text-primary" size="lg" />
+                ) : null}
+              </ActionsheetItem>
+            );
+          })}
+        </ActionsheetScrollView>
+      </ActionsheetContent>
+    </Actionsheet>
   );
 }

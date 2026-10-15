@@ -1,7 +1,8 @@
 import { ChevronDown } from "lucide-react-native";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
+import { Pressable } from "@/components/ui/pressable";
 import { Text } from "@/components/ui/text";
 
 type AppointmentSelectFieldProps = {

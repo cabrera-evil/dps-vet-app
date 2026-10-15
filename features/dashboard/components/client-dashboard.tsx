@@ -1,9 +1,13 @@
 import { router } from "expo-router";
 import { CalendarPlus, ChevronRight, ClipboardList, Moon, PawPrint, Plus, Sun } from "lucide-react-native";
-import { ActivityIndicator, Alert, Pressable, ScrollView, View } from "react-native";
+import { View } from "react-native";
 
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
+import { Pressable } from "@/components/ui/pressable";
+import { ScrollView } from "@/components/ui/scroll-view";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { useNotice } from "@/hooks/use-notice";
 import { useAuthSession } from "@/features/auth/auth-session-context";
 import { dashboardMock } from "@/features/dashboard/dashboard.mock";
 import { APPOINTMENT_STATUS_LABEL, useAppointmentViews } from "@/features/appointments/use-appointments";
@@ -17,6 +21,7 @@ import { DashboardSection } from "./dashboard-section";
 import { PetSummaryCard } from "./pet-summary-card";
 
 export function ClientDashboard() {
+  const notify = useNotice();
   const { user } = useAuthSession();
   const { pets, isPending, isError, refetch } = usePets();
   const {
@@ -56,7 +61,7 @@ export function ClientDashboard() {
 
       <DashboardSection title="Próxima cita">
         {appointmentLoading ? (
-          <ActivityIndicator accessibilityLabel="Cargando próxima cita" />
+          <Spinner accessibilityLabel="Cargando próxima cita" />
         ) : appointmentError ? (
           <Pressable
             accessibilityRole="button"
@@ -126,7 +131,7 @@ export function ClientDashboard() {
         >
           {isPending ? (
             <View className="mr-3 min-h-11 w-40 items-center justify-center">
-              <ActivityIndicator accessibilityLabel="Cargando mascotas" />
+              <Spinner accessibilityLabel="Cargando mascotas" />
             </View>
           ) : null}
           {isError ? (
@@ -171,7 +176,7 @@ export function ClientDashboard() {
               onPress={() =>
                 action.id === "book"
                   ? router.push("/(client)/appointments/new")
-                  : Alert.alert("Próximamente", action.description)
+                  : notify("Próximamente", action.description)
               }
             >
               <View className="h-12 w-12 items-center justify-center rounded-lg bg-secondary">

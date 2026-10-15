@@ -1,7 +1,8 @@
 import { Eye, EyeOff } from "lucide-react-native";
 import { forwardRef, useState, type ComponentProps } from "react";
-import { Pressable, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 
+import { Pressable } from "@/components/ui/pressable";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";

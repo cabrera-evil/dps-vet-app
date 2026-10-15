@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView } from "@/components/ui/scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // Tab-screen scroller: clears the status bar / notch (tabs have no header).

@@ -1,5 +1,5 @@
 import { Link, type Href } from "expo-router";
-import { Pressable } from "react-native";
+import { Pressable } from "@/components/ui/pressable";
 
 import { Text } from "@/components/ui/text";
 

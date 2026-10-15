@@ -1,6 +1,8 @@
 import { router } from "expo-router";
-import { ActivityIndicator, Pressable, View } from "react-native";
+import { View } from "react-native";
 
+import { Pressable } from "@/components/ui/pressable";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
 import { ClientPlaceholderScreen } from "@/features/dashboard/components/client-placeholder-screen";
 import { PetSpeciesIcon } from "@/features/pets/components/pet-species-icon";
@@ -16,7 +18,7 @@ export default function PetsRoute() {
       onAction={() => router.push("/(client)/pets/new")}
       title="Mis mascotas"
     >
-      {isPending ? <ActivityIndicator accessibilityLabel="Cargando mascotas" /> : null}
+      {isPending ? <Spinner accessibilityLabel="Cargando mascotas" /> : null}
       {isError ? (
         <Pressable
           accessibilityRole="button"

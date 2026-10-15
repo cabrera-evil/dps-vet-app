@@ -1,7 +1,12 @@
 import { router } from "expo-router";
-import { ActivityIndicator, Alert, Pressable, View } from "react-native";
+import { useState } from "react";
+import { View } from "react-native";
 
+import { ConfirmDialog } from "@/components/custom/confirm-dialog";
+import { Pressable } from "@/components/ui/pressable";
+import { Spinner } from "@/components/ui/spinner";
 import { Text } from "@/components/ui/text";
+import { useNotice } from "@/hooks/use-notice";
 import {
   APPOINTMENT_STATUS_LABEL,
   type AppointmentView,
@@ -17,31 +22,22 @@ export function ClientAppointmentsScreen() {
   const { views, isPending, isError, refetch } = useAppointmentViews();
   const { cancelAppointment, isPending: cancelling } = useCancelAppointment();
 
-  const confirmCancel = (appointment: AppointmentView) =>
-    Alert.alert(
-      "Cancelar cita",
-      `¿Quieres cancelar la cita de ${appointment.petName} (${appointment.serviceName})?`,
-      [
-        { text: "Conservar", style: "cancel" },
-        {
-          text: "Cancelar cita",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await cancelAppointment(appointment.id);
-            } catch (error) {
-              const { status } = parseApiError(error);
-              Alert.alert(
-                "No se pudo cancelar",
-                status === 422
-                  ? "La cita ya inició y no puede cancelarse."
-                  : requestErrorMessage(status),
-              );
-            }
-          },
-        },
-      ],
-    );
+  const notify = useNotice();
+  const [toCancel, setToCancel] = useState<AppointmentView | null>(null);
+
+  const cancel = async (appointment: AppointmentView) => {
+    try {
+      await cancelAppointment(appointment.id);
+    } catch (error) {
+      const { status } = parseApiError(error);
+      notify(
+        "No se pudo cancelar",
+        status === 422
+          ? "La cita ya inició y no puede cancelarse."
+          : requestErrorMessage(status),
+      );
+    }
+  };
 
   return (
     <ClientPlaceholderScreen
@@ -50,7 +46,7 @@ export function ClientAppointmentsScreen() {
       onAction={() => router.push("/(client)/appointments/new")}
       title="Mis citas"
     >
-      {isPending ? <ActivityIndicator accessibilityLabel="Cargando citas" /> : null}
+      {isPending ? <Spinner accessibilityLabel="Cargando citas" /> : null}
       {isError ? (
         <Pressable
           accessibilityRole="button"
@@ -111,7 +107,7 @@ export function ClientAppointmentsScreen() {
               accessibilityState={{ disabled: cancelling }}
               className="mt-4 min-h-11 items-center justify-center rounded-lg bg-primary-foreground/15 active:opacity-70"
               disabled={cancelling}
-              onPress={() => confirmCancel(appointment)}
+              onPress={() => setToCancel(appointment)}
             >
               <Text className="text-sm font-sans-semibold text-primary-foreground">
                 Cancelar cita
@@ -120,6 +116,16 @@ export function ClientAppointmentsScreen() {
           ) : null}
         </View>
       ))}
+      <ConfirmDialog
+        cancelLabel="Conservar"
+        confirmLabel="Cancelar cita"
+        destructive
+        isOpen={toCancel !== null}
+        message={`¿Quieres cancelar la cita de ${toCancel?.petName} (${toCancel?.serviceName})?`}
+        onClose={() => setToCancel(null)}
+        onConfirm={() => toCancel && void cancel(toCancel)}
+        title="Cancelar cita"
+      />
     </ClientPlaceholderScreen>
   );
 }

@@ -1,11 +1,12 @@
 import { z } from "zod";
 import { useRef, useState } from "react";
 import { Eye, EyeOff } from "lucide-react-native";
-import { Pressable, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
+import { Pressable } from "@/components/ui/pressable";
 import { Input, InputField, InputSlot } from "@/components/ui/input";
 import { Text } from "@/components/ui/text";
 import { KeyboardScreen } from "@/features/shared/components/keyboard-screen";

@@ -1,8 +1,9 @@
 import { router } from "expo-router";
 import type { ReactNode } from "react";
-import { Pressable, View } from "react-native";
+import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
+import { Pressable } from "@/components/ui/pressable";
 import { KeyboardScreen } from "@/features/shared/components/keyboard-screen";
 import { DecorativeIcon } from "@/features/shared/components/decorative-icon";
 import { SCREEN_GUTTER } from "@/features/shared/layout";

@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
+
+import { useNotice } from "@/hooks/use-notice";
 
 import { Button, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
@@ -20,6 +22,8 @@ export function ClientPlaceholderScreen({
   onAction,
   children,
 }: ClientPlaceholderScreenProps) {
+  const notify = useNotice();
+
   return (
     <ScreenScroll>
       <Text accessibilityRole="header" className="font-heading text-3xl text-foreground">
@@ -34,7 +38,7 @@ export function ClientPlaceholderScreen({
         onPress={
           onAction ??
           (() =>
-            Alert.alert(
+            notify(
               "Próximamente",
               `${actionLabel} estará disponible en la siguiente vista.`,
             ))

@@ -1,11 +1,7 @@
 import type { ReactNode } from "react";
-import {
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  type StyleProp,
-  type ViewStyle,
-} from "react-native";
+import { Platform, type StyleProp, type ViewStyle } from "react-native";
+import { KeyboardAvoidingView } from "@/components/ui/keyboard-avoiding-view";
+import { ScrollView } from "@/components/ui/scroll-view";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type KeyboardScreenProps = {

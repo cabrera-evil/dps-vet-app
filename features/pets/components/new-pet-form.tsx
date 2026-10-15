@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { router } from "expo-router";
 import { useState } from "react";
-import { Alert, View } from "react-native";
+import { View } from "react-native";
 
+import { useNotice } from "@/hooks/use-notice";
 import { OptionPicker } from "@/components/option-picker";
 import { Button, ButtonText } from "@/components/ui/button";
 import { Input, InputField } from "@/components/ui/input";
@@ -73,6 +74,7 @@ function FieldError({ message }: { message?: string }) {
 
 export function NewPetForm() {
   const { createPet, isPending } = useCreatePet();
+  const notify = useNotice();
   const [values, setValues] = useState<NewPetValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
   const [activePicker, setActivePicker] = useState<PickerName>(null);
@@ -142,9 +144,8 @@ export function NewPetForm() {
       else setFormError(requestErrorMessage(status));
       return;
     }
-    Alert.alert("Mascota registrada", `${data.name} ya aparece en tu lista de mascotas.`, [
-      { text: "Ver mascotas", onPress: () => router.back() },
-    ]);
+    notify("Mascota registrada", `${data.name} ya aparece en tu lista de mascotas.`);
+    router.back();
   };
 
   const pickerOptions =

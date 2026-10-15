@@ -1,9 +1,10 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
-import { Alert, TextInput, View } from "react-native";
+import { TextInput, View } from "react-native";
 
 import { Button, ButtonSpinner, ButtonText } from "@/components/ui/button";
 import { Text } from "@/components/ui/text";
+import { useNotice } from "@/hooks/use-notice";
 import { FormScreen } from "@/features/shared/components/form-screen";
 import { usePost } from "@/hooks/use-rest";
 import { parseApiError } from "@/lib/api-error";
@@ -24,6 +25,7 @@ export function ResetPasswordScreen() {
   const [errors, setErrors] = useState<FieldErrors<ResetPassword & { oobCode: string }>>({});
   const [formError, setFormError] = useState<string | null>(null);
   const confirmRef = useRef<TextInput>(null);
+  const notify = useNotice();
   const rawCode = Array.isArray(paramCode) ? paramCode[0] : paramCode;
   const oobCode = (rawCode || manualCode).trim();
 
@@ -60,9 +62,8 @@ export function ResetPasswordScreen() {
       return;
     }
 
-    Alert.alert("Contraseña actualizada", "Ya puedes iniciar sesión con tu nueva contraseña.", [
-      { text: "Entendido", onPress: () => router.replace("/(auth)/login") },
-    ]);
+    notify("Contraseña actualizada", "Ya puedes iniciar sesión con tu nueva contraseña.");
+    router.replace("/(auth)/login");
   };
 
   return (
