@@ -28,7 +28,7 @@ concurrency:
 jobs:
   set_environment:
     name: Set
-    uses: DigitalDreamsInc/workflows/.github/workflows/set-environment.yaml@master
+    uses: cabrera-evil/workflows/.github/workflows/set-environment.yaml@master
     with:
       ref: ${{ github.ref }}
     secrets: inherit
@@ -36,7 +36,7 @@ jobs:
   analyze_code:
     name: Analyze
     needs: [set_environment]
-    uses: DigitalDreamsInc/workflows/.github/workflows/code-analysis.yaml@master
+    uses: cabrera-evil/workflows/.github/workflows/code-analysis.yaml@master
     with:
       default_branch: ${{ github.event.repository.default_branch }}
       push_before_sha: ${{ github.event.before }}
@@ -46,7 +46,7 @@ jobs:
   analyze_deps:
     name: Analyze
     needs: [set_environment]
-    uses: DigitalDreamsInc/workflows/.github/workflows/deps-analysis.yaml@master
+    uses: cabrera-evil/workflows/.github/workflows/deps-analysis.yaml@master
     with:
       continue-on-error: true
     secrets: inherit
@@ -54,7 +54,7 @@ jobs:
   build_apk:
     name: Build
     needs: [set_environment, analyze_deps, analyze_code]
-    uses: DigitalDreamsInc/workflows/.github/workflows/expo-build-apk.yaml@master
+    uses: cabrera-evil/workflows/.github/workflows/expo-build-apk.yaml@master
     with:
       environment: ${{ needs.set_environment.outputs.environment }}
       runner: '["self-hosted"]'
