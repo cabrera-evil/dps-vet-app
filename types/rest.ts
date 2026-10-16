@@ -12,7 +12,7 @@ export interface Pagination {
 	page: number;
 	pageSize: number;
 	total: number;
-	totalPages: number;
+	pageCount: number;
 }
 
 /** Success envelope returned by the dps-vet-web API. */

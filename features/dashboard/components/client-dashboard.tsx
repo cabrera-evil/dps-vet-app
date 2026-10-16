@@ -83,7 +83,14 @@ export function ClientDashboard() {
             </Text>
           </Pressable>
         ) : (
-        <View className="overflow-hidden rounded-xl bg-primary p-5">
+        <Pressable
+          accessibilityLabel={`Ver cita de ${appointment.petName}`}
+          accessibilityRole="button"
+          className="overflow-hidden rounded-xl bg-primary p-5 active:opacity-70"
+          onPress={() =>
+            router.push({ pathname: "/(client)/appointments/[id]", params: { id: appointment.id } })
+          }
+        >
           <View className="flex-row items-center justify-between">
             <View className="rounded-full bg-primary-foreground/15 px-3 py-1">
               <Text className="text-xs font-sans-semibold text-primary-foreground">
@@ -114,7 +121,7 @@ export function ClientDashboard() {
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
         )}
       </DashboardSection>
 
@@ -173,11 +180,13 @@ export function ClientDashboard() {
               key={action.id}
               accessibilityRole="button"
               className="min-h-11 flex-row items-center rounded-xl border border-border bg-card p-4 active:bg-muted"
-              onPress={() =>
-                action.id === "book"
-                  ? router.push("/(client)/appointments/new")
-                  : notify("Próximamente", action.description)
-              }
+              onPress={() => {
+                if (action.id === "book") router.push("/(client)/appointments/new");
+                else if (pets.length === 1)
+                  router.push({ pathname: "/(client)/pets/[id]", params: { id: pets[0].id } });
+                else if (pets.length > 1) router.push("/(client)/(tabs)/pets");
+                else notify("Sin mascotas", "Registra una mascota para ver su historial.");
+              }}
             >
               <View className="h-12 w-12 items-center justify-center rounded-lg bg-secondary">
                 <DecorativeIcon

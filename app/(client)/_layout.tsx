@@ -10,7 +10,10 @@ export default function ClientLayout() {
         name="appointments/new"
         options={{ animation: "slide_from_right" }}
       />
+      <Stack.Screen name="appointments/[id]" options={{ animation: "slide_from_right" }} />
       <Stack.Screen name="pets/new" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="pets/[id]/index" options={{ animation: "slide_from_right" }} />
+      <Stack.Screen name="pets/[id]/edit" options={{ animation: "slide_from_right" }} />
     </Stack>
   );
 }
