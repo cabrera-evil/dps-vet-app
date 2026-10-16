@@ -68,10 +68,18 @@ export function ClientAppointmentsScreen() {
       {views.map((appointment) => (
         <View
           key={appointment.id}
-          className={`rounded-xl p-5 ${
+          className={`rounded-xl ${
             appointment.upcoming ? "bg-primary" : "border border-border bg-card"
           }`}
         >
+          <Pressable
+            accessibilityLabel={`Ver cita de ${appointment.petName}`}
+            accessibilityRole="button"
+            className="p-5 active:opacity-70"
+            onPress={() =>
+              router.push({ pathname: "/(client)/appointments/[id]", params: { id: appointment.id } })
+            }
+          >
           <Text
             className={`text-xs font-sans-semibold ${
               appointment.upcoming ? "text-primary-foreground" : "text-muted-foreground"
@@ -100,12 +108,13 @@ export function ClientAppointmentsScreen() {
           >
             {formatClinicLongDate(appointment.start)} · {formatClinicTime(appointment.start)}
           </Text>
+          </Pressable>
           {appointment.upcoming ? (
             <Pressable
               accessibilityLabel={`Cancelar cita de ${appointment.petName}`}
               accessibilityRole="button"
               accessibilityState={{ disabled: cancelling }}
-              className="mt-4 min-h-11 items-center justify-center rounded-lg bg-primary-foreground/15 active:opacity-70"
+              className="mx-5 mb-5 min-h-11 items-center justify-center rounded-lg bg-primary-foreground/15 active:opacity-70"
               disabled={cancelling}
               onPress={() => setToCancel(appointment)}
             >

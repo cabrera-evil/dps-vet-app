@@ -83,7 +83,14 @@ export function ClientDashboard() {
             </Text>
           </Pressable>
         ) : (
-        <View className="overflow-hidden rounded-xl bg-primary p-5">
+        <Pressable
+          accessibilityLabel={`Ver cita de ${appointment.petName}`}
+          accessibilityRole="button"
+          className="overflow-hidden rounded-xl bg-primary p-5 active:opacity-70"
+          onPress={() =>
+            router.push({ pathname: "/(client)/appointments/[id]", params: { id: appointment.id } })
+          }
+        >
           <View className="flex-row items-center justify-between">
             <View className="rounded-full bg-primary-foreground/15 px-3 py-1">
               <Text className="text-xs font-sans-semibold text-primary-foreground">
@@ -114,7 +121,7 @@ export function ClientDashboard() {
               </Text>
             </View>
           </View>
-        </View>
+        </Pressable>
         )}
       </DashboardSection>
 

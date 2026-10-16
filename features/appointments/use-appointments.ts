@@ -81,12 +81,45 @@ export function useAppointmentViews() {
 	};
 }
 
+export interface AppointmentDetailView extends AppointmentView {
+	service?: AppointmentService;
+}
+
+/** Single appointment (404 when it is not the caller's) joined with pet/service data. */
+export function useAppointment(id: string) {
+	const query = useGet<ApiResponse<Appointment>>(
+		{ url: `${APPOINTMENTS_URL}/${id}` },
+		{ enabled: id.length > 0 }
+	);
+	const { pets } = usePets();
+	const { services } = useServices();
+	const { dataUpdatedAt } = query;
+	const item = query.data?.data;
+
+	const appointment = useMemo<AppointmentDetailView | undefined>(() => {
+		if (!item) return undefined;
+		const service = services.find((entry) => entry.id === item.serviceId);
+		return {
+			...item,
+			petName: pets.find((pet) => pet.id === item.petId)?.name ?? 'Tu mascota',
+			serviceName: service?.name ?? 'Servicio',
+			service,
+			upcoming:
+				(item.status === AppointmentStatus.PENDING ||
+					item.status === AppointmentStatus.CONFIRMED) &&
+				Date.parse(item.start) > dataUpdatedAt,
+		};
+	}, [item, pets, services, dataUpdatedAt]);
+
+	return { ...query, appointment };
+}
+
 function useInvalidateAppointments() {
 	const queryClient = useQueryClient();
 	return () =>
 		queryClient.invalidateQueries({
 			predicate: ({ queryKey }) =>
-				(queryKey[1] as { url?: string } | undefined)?.url === APPOINTMENTS_URL,
+				((queryKey[1] as { url?: string } | undefined)?.url ?? '').startsWith(APPOINTMENTS_URL),
 		});
 }
 
