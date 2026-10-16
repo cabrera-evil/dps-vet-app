@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024">
+  <!-- Placeholder brand mark for "Veterinaria San Roque": teal field + white paw print (glyph within the inner ~66%). -->
+  <rect width="1024" height="1024" fill="#0F766E"/>
+  <g id="glyph" fill="#FFFFFF">
+    <ellipse cx="512" cy="650" rx="150" ry="120"/>
+    <ellipse cx="352" cy="500" rx="50" ry="66"/>
+    <ellipse cx="456" cy="404" rx="52" ry="72"/>
+    <ellipse cx="568" cy="404" rx="52" ry="72"/>
+    <ellipse cx="672" cy="500" rx="50" ry="66"/>
+  </g>
+</svg>

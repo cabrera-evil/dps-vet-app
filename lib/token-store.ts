@@ -5,5 +5,7 @@ const REFRESH_TOKEN_KEY = 'auth_refresh_token';
 
 export const getRefreshToken = () => SecureStore.getItemAsync(REFRESH_TOKEN_KEY);
 export const setRefreshToken = (token: string) =>
-	SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token);
+	SecureStore.setItemAsync(REFRESH_TOKEN_KEY, token, {
+		keychainAccessible: SecureStore.WHEN_UNLOCKED_THIS_DEVICE_ONLY,
+	});
 export const clearRefreshToken = () => SecureStore.deleteItemAsync(REFRESH_TOKEN_KEY);
