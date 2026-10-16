@@ -16,6 +16,7 @@ import { FormScreen } from "@/features/shared/components/form-screen";
 import { useNotice } from "@/hooks/use-notice";
 import { parseApiError } from "@/lib/api-error";
 import { formatClinicLongDate, formatClinicTime } from "@/utils/date";
+import { formatPrice } from "@/utils/format";
 
 function Row({ label, children }: { label: string; children: ReactNode }) {
   return (
@@ -122,7 +123,7 @@ export function AppointmentDetail({ id }: { id: string }) {
               <Value>{service.durationMinutes} min</Value>
             </Row>
             <Row label="Precio">
-              <Value>{`$${service.price.toFixed(2)}`}</Value>
+              <Value>{formatPrice(service.price)}</Value>
             </Row>
           </>
         ) : null}
