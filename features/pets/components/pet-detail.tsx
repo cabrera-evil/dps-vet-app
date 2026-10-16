@@ -157,7 +157,7 @@ export function PetDetail({ id }: { id: string }) {
         confirmLabel="Eliminar"
         destructive
         isOpen={confirmOpen}
-        message={`Se eliminará a ${pet.name} de tu lista. Esta acción no se puede deshacer.`}
+        message={`Se eliminará a ${pet.name} de tu lista y se cancelarán sus citas próximas. Esta acción no se puede deshacer.`}
         onClose={() => setConfirmOpen(false)}
         onConfirm={handleDelete}
         title="¿Eliminar mascota?"
