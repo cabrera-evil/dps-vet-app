@@ -39,3 +39,16 @@ export interface CatalogEntry {
 export interface BreedEntry extends CatalogEntry {
 	species: string;
 }
+
+/** PATCH /pets/:id body: at least one changed field; `ownerId` and `weightKg` are never sent. */
+export type UpdatePetPayload = Partial<CreatePetPayload>;
+
+/** GET /pets/:id/clinical-summary (owner-readable subset; owner contact and last consultation omitted). */
+export interface PetClinicalSummary {
+	recordNumber?: string;
+	alerts: { id: string; title: string; detail?: string }[];
+	activeProblems: { id: string; name: string; statusLabel: string }[];
+	weightHistory: { valueKg: number; measuredAt: string }[];
+	currentMedications: { id: string; name: string; instructions: string }[];
+	nextFollowUp?: { id: string; recommendedDate: string; reason: string };
+}

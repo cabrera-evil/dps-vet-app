@@ -38,9 +38,12 @@ export default function PetsRoute() {
         </View>
       ) : null}
       {pets.map((pet) => (
-        <View
+        <Pressable
           key={pet.id}
-          className="flex-row items-center rounded-xl border border-border bg-card p-4"
+          accessibilityLabel={`Ver ${pet.name}`}
+          accessibilityRole="button"
+          className="min-h-11 flex-row items-center rounded-xl border border-border bg-card p-4 active:bg-muted"
+          onPress={() => router.push({ pathname: "/(client)/pets/[id]", params: { id: pet.id } })}
         >
           <View className="h-12 w-12 items-center justify-center rounded-lg bg-secondary">
             <PetSpeciesIcon species={pet.species} />
@@ -51,7 +54,7 @@ export default function PetsRoute() {
               {pet.breed}
             </Text>
           </View>
-        </View>
+        </Pressable>
       ))}
     </ClientPlaceholderScreen>
   );

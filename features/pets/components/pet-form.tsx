@@ -12,7 +12,8 @@ import { Text } from "@/components/ui/text";
 import { Textarea, TextareaInput } from "@/components/ui/textarea";
 import { DateField } from "@/components/custom/date-field";
 import { AppointmentSelectField } from "@/features/appointments/components/appointment-select-field";
-import { useBreeds, useCreatePet, useSpecies } from "@/features/pets/use-pets";
+import { useBreeds, useCreatePet, useSpecies, useUpdatePet } from "@/features/pets/use-pets";
+import type { Pet, UpdatePetPayload } from "@/types/pet.type";
 import { parseApiError } from "@/lib/api-error";
 import { requestErrorMessage } from "@/features/auth/validate";
 import { FormScreen } from "@/features/shared/components/form-screen";
@@ -45,7 +46,7 @@ type FieldName = keyof NewPetValues;
 type FormErrors = Partial<Record<FieldName, string>>;
 type PickerName = "species" | "breed" | "sex" | null;
 
-const initialValues: NewPetValues = {
+const emptyValues: NewPetValues = {
   name: "",
   species: "",
   breed: "",
@@ -64,6 +65,36 @@ const sexLabels: Record<NonNullable<NewPetValues["sex"]>, string> = {
   FEMALE: "Hembra",
 };
 
+const valuesFromPet = (pet: Pet): NewPetValues => ({
+  name: pet.name,
+  species: pet.species,
+  breed: pet.breed ?? "",
+  sex: pet.sex ?? "",
+  birthDate: pet.birthDate.slice(0, 10),
+  sterilized: pet.sterilized ?? false,
+  color: pet.color ?? "",
+  microchip: pet.microchip ?? "",
+  markings: pet.markings ?? "",
+  notes: pet.notes ?? "",
+});
+
+/** Only the fields that differ from the stored pet (PATCH is partial). Cleared optional text is sent as "". */
+function changedFields(initial: NewPetValues, data: NewPetValues): UpdatePetPayload {
+  const diff: UpdatePetPayload = {};
+  if (data.name !== initial.name) diff.name = data.name;
+  if (data.species !== initial.species) diff.species = data.species;
+  // A new species never inherits the old breed, so the breed travels with it.
+  if (data.breed && (data.breed !== initial.breed || data.species !== initial.species)) diff.breed = data.breed;
+  if (data.birthDate !== initial.birthDate) diff.birthDate = data.birthDate;
+  // ponytail: the API cannot unset sex, so "Sin especificar" on a pet that has one is ignored.
+  if (data.sex && data.sex !== initial.sex) diff.sex = data.sex;
+  if (data.sterilized !== initial.sterilized) diff.sterilized = data.sterilized;
+  for (const key of ["color", "microchip", "markings", "notes"] as const) {
+    if (data[key] !== initial[key]) diff[key] = data[key];
+  }
+  return diff;
+}
+
 function FieldLabel({ children }: { children: string }) {
   return <Text className="mb-2 text-sm font-sans-semibold text-foreground">{children}</Text>;
 }
@@ -72,8 +103,13 @@ function FieldError({ message }: { message?: string }) {
   return message ? <Text accessibilityRole="alert" className="mt-2 text-sm text-destructive">{message}</Text> : null;
 }
 
-export function NewPetForm() {
-  const { createPet, isPending } = useCreatePet();
+/** Create form, or edit form when `pet` is given (prefilled; sends only changed fields). */
+export function PetForm({ pet }: { pet?: Pet }) {
+  const isEdit = !!pet;
+  const { createPet, isPending: isCreating } = useCreatePet();
+  const { updatePet, isPending: isUpdating } = useUpdatePet(pet?.id ?? "");
+  const isPending = isCreating || isUpdating;
+  const [initialValues] = useState<NewPetValues>(() => (pet ? valuesFromPet(pet) : emptyValues));
   const notify = useNotice();
   const [values, setValues] = useState<NewPetValues>(initialValues);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -126,7 +162,15 @@ export function NewPetForm() {
     const { data } = parsed;
     setFormError(null);
     try {
-      await createPet({
+      if (isEdit) {
+        const diff = changedFields(initialValues, data);
+        if (Object.keys(diff).length === 0) {
+          notify("Sin cambios", "No modificaste ningún dato.");
+          router.back();
+          return;
+        }
+        await updatePet(diff);
+      } else await createPet({
         name: data.name,
         species: data.species,
         breed: data.breed || undefined,
@@ -141,10 +185,12 @@ export function NewPetForm() {
     } catch (error) {
       const { status, fieldErrors } = parseApiError(error);
       if (status === 400 && Object.keys(fieldErrors).length) setErrors(fieldErrors);
+      else if (status === 404) setFormError("Esta mascota ya no existe.");
       else setFormError(requestErrorMessage(status));
       return;
     }
-    notify("Mascota registrada", `${data.name} ya aparece en tu lista de mascotas.`);
+    if (isEdit) notify("Cambios guardados", `Actualizamos los datos de ${data.name}.`);
+    else notify("Mascota registrada", `${data.name} ya aparece en tu lista de mascotas.`);
     router.back();
   };
 
@@ -157,9 +203,9 @@ export function NewPetForm() {
 
   return (
     <FormScreen
-      backLabel="Volver a mascotas"
-      subtitle="Registra a tu compañero para agendar citas."
-      title="Nueva mascota"
+      backLabel={isEdit ? "Volver al detalle" : "Volver a mascotas"}
+      subtitle={isEdit ? "Actualiza los datos de tu compañero." : "Registra a tu compañero para agendar citas."}
+      title={isEdit ? "Editar mascota" : "Nueva mascota"}
     >
         <View className="rounded-xl border border-border bg-secondary p-4">
           <Text className="font-sans-semibold text-secondary-foreground">Datos de tu mascota</Text>
@@ -266,7 +312,9 @@ export function NewPetForm() {
           disabled={isPending}
           onPress={handleSubmit}
         >
-          <ButtonText className="font-sans-semibold">{isPending ? "Registrando..." : "Registrar mascota"}</ButtonText>
+          <ButtonText className="font-sans-semibold">
+            {isEdit ? (isPending ? "Guardando..." : "Guardar cambios") : isPending ? "Registrando..." : "Registrar mascota"}
+          </ButtonText>
         </Button>
       <OptionPicker
         onClose={() => setActivePicker(null)}
