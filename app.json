@@ -1,56 +1,56 @@
 {
-  "expo": {
-    "name": "Veterinaria San Roque",
-    "slug": "dps-vet-app",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "dpsvetapp",
-    "userInterfaceStyle": "automatic",
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.digitaldreams.dpsvetapp",
-      "buildNumber": "1.0.0"
-    },
-    "android": {
-      "package": "com.digitaldreams.dpsvetapp",
-      "versionCode": 1,
-      "adaptiveIcon": {
-        "backgroundColor": "#0F766E",
-        "foregroundImage": "./assets/images/android-icon-foreground.png",
-        "backgroundImage": "./assets/images/android-icon-background.png",
-        "monochromeImage": "./assets/images/android-icon-monochrome.png"
-      },
-      "predictiveBackGestureEnabled": false,
-      "allowBackup": false
-    },
-    "web": {
-      "output": "static",
-      "favicon": "./assets/images/favicon.png",
-      "name": "Veterinaria San Roque",
-      "themeColor": "#0F766E"
-    },
-    "plugins": [
-      "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "backgroundColor": "#0F766E",
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 240,
-          "dark": {
-            "image": "./assets/images/splash-icon.png",
-            "backgroundColor": "#042F2E"
-          }
-        }
-      ],
-      "expo-secure-store",
-      "@react-native-community/datetimepicker"
-    ],
-    "experiments": {
-      "typedRoutes": true,
-      "reactCompiler": true
-    },
-    "description": "Gestiona las mascotas y las citas de tu clínica veterinaria San Roque en San Salvador."
-  }
+	"expo": {
+		"name": "Veterinaria San Roque",
+		"slug": "dps-vet-app",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"icon": "./assets/images/icon.png",
+		"scheme": "dpsvetapp",
+		"userInterfaceStyle": "automatic",
+		"ios": {
+			"supportsTablet": true,
+			"bundleIdentifier": "com.digitaldreams.dpsvetapp",
+			"buildNumber": "1.0.0"
+		},
+		"android": {
+			"package": "com.digitaldreams.dpsvetapp",
+			"versionCode": 1,
+			"adaptiveIcon": {
+				"backgroundColor": "#0F766E",
+				"foregroundImage": "./assets/images/android-icon-foreground.png",
+				"backgroundImage": "./assets/images/android-icon-background.png",
+				"monochromeImage": "./assets/images/android-icon-monochrome.png"
+			},
+			"predictiveBackGestureEnabled": false,
+			"allowBackup": false
+		},
+		"web": {
+			"output": "static",
+			"favicon": "./assets/images/favicon.png",
+			"name": "Veterinaria San Roque",
+			"themeColor": "#0F766E"
+		},
+		"plugins": [
+			"expo-router",
+			[
+				"expo-splash-screen",
+				{
+					"backgroundColor": "#0F766E",
+					"image": "./assets/images/splash-icon.png",
+					"imageWidth": 240,
+					"dark": {
+						"image": "./assets/images/splash-icon.png",
+						"backgroundColor": "#042F2E"
+					}
+				}
+			],
+			"expo-secure-store",
+			"@react-native-community/datetimepicker"
+		],
+		"experiments": {
+			"typedRoutes": true,
+			"reactCompiler": true
+		},
+		"description": "Gestiona las mascotas y las citas de tu clínica veterinaria San Roque en San Salvador."
+	}
 }

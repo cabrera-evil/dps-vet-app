@@ -1,9 +1,23 @@
 import { isAxiosError } from 'axios';
 
 import { parseApiError } from '@/lib/api-error';
-import { create, list, setTokenProvider, setUnauthorizedHandler } from '@/lib/rest';
-import { clearRefreshToken, getRefreshToken, setRefreshToken } from '@/lib/token-store';
-import type { AuthUser, PermissionsResponse, TokenIssued, TokenResponse } from '@/types/auth';
+import {
+	create,
+	list,
+	setTokenProvider,
+	setUnauthorizedHandler,
+} from '@/lib/rest';
+import {
+	clearRefreshToken,
+	getRefreshToken,
+	setRefreshToken,
+} from '@/lib/token-store';
+import type {
+	AuthUser,
+	PermissionsResponse,
+	TokenIssued,
+	TokenResponse,
+} from '@/types/auth';
 import type { ApiResponse } from '@/types/rest';
 import { isCustomerAccount } from '@/utils/permission';
 
@@ -44,7 +58,9 @@ let refreshInFlight: Promise<string> | null = null;
 let epoch = 0;
 let onSessionEnded: (() => void) | null = null;
 
-export const setSessionEndedListener = (listener: (() => void) | null): void => {
+export const setSessionEndedListener = (
+	listener: (() => void) | null
+): void => {
 	onSessionEnded = listener;
 };
 
@@ -110,14 +126,19 @@ async function getValidIdToken(): Promise<string | null> {
 	}
 }
 
-async function handleUnauthorized(error: unknown, retried: boolean): Promise<boolean> {
+async function handleUnauthorized(
+	error: unknown,
+	retried: boolean
+): Promise<boolean> {
 	if (!idToken) return false; // no established session (e.g. mid sign-in)
 	if (retried) {
 		await endSession();
 		onSessionEnded?.();
 		return false;
 	}
-	const sent = isAxiosError(error) ? error.config?.headers?.get?.('Authorization') : undefined;
+	const sent = isAxiosError(error)
+		? error.config?.headers?.get?.('Authorization')
+		: undefined;
 	// Another caller already renewed the token since this request left: just replay.
 	if (sent && sent !== `Bearer ${idToken}`) return true;
 	try {
@@ -131,7 +152,10 @@ async function handleUnauthorized(error: unknown, retried: boolean): Promise<boo
 setTokenProvider(getValidIdToken);
 setUnauthorizedHandler(handleUnauthorized);
 
-function userFromToken(token: string, fallback?: TokenIssued['identity']): AuthUser {
+function userFromToken(
+	token: string,
+	fallback?: TokenIssued['identity']
+): AuthUser {
 	try {
 		const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/');
 		const json = decodeURIComponent(
@@ -141,14 +165,23 @@ function userFromToken(token: string, fallback?: TokenIssued['identity']): AuthU
 				.join('')
 		);
 		// Display-only claims; authorization is always decided by the API.
-		const claims = JSON.parse(json) as { user_id?: string; sub?: string; name?: string; email?: string };
+		const claims = JSON.parse(json) as {
+			user_id?: string;
+			sub?: string;
+			name?: string;
+			email?: string;
+		};
 		return {
 			uid: claims.user_id ?? claims.sub ?? fallback?.uid ?? '',
 			name: claims.name ?? fallback?.name,
 			email: claims.email ?? fallback?.email,
 		};
 	} catch {
-		return { uid: fallback?.uid ?? '', name: fallback?.name, email: fallback?.email };
+		return {
+			uid: fallback?.uid ?? '',
+			name: fallback?.name,
+			email: fallback?.email,
+		};
 	}
 }
 
@@ -167,7 +200,10 @@ async function assertCustomer(token: string): Promise<void> {
 	if (!isCustomerAccount(permissions)) throw new AuthError('not-customer');
 }
 
-export async function signInWithPassword(email: string, password: string): Promise<AuthUser> {
+export async function signInWithPassword(
+	email: string,
+	password: string
+): Promise<AuthUser> {
 	let issued: TokenIssued;
 	try {
 		const res = await create<ApiResponse<TokenIssued>>({
@@ -203,7 +239,8 @@ export async function restoreSession(): Promise<AuthUser | null> {
 	try {
 		token = await refreshIdToken();
 	} catch (error) {
-		if (error instanceof AuthError && error.code === 'invalid-credentials') return null;
+		if (error instanceof AuthError && error.code === 'invalid-credentials')
+			return null;
 		throw error;
 	}
 	try {
@@ -225,15 +262,23 @@ export async function signOutSession(): Promise<void> {
 	// now (endSession deletes it) and exchanged in the background, then used for the logout call.
 	const token = idToken;
 	const valid = !!token && expiresAt - Date.now() > 0;
-	const stored = valid || !token ? null : await getRefreshToken().catch(() => null);
+	const stored =
+		valid || !token ? null : await getRefreshToken().catch(() => null);
 	await endSession();
 	const revoke = async (bearer: string | null) => {
-		if (bearer) await create({ url: AUTH_URL.logout, headers: { Authorization: `Bearer ${bearer}` } });
+		if (bearer)
+			await create({
+				url: AUTH_URL.logout,
+				headers: { Authorization: `Bearer ${bearer}` },
+			});
 	};
 	if (valid) revoke(token).catch(() => {});
 	else if (stored) {
 		// Direct exchange: refreshIdToken() would fail (token already cleared) and must not store anything.
-		create<ApiResponse<TokenResponse>>({ url: AUTH_URL.refresh, payload: { refreshToken: stored } })
+		create<ApiResponse<TokenResponse>>({
+			url: AUTH_URL.refresh,
+			payload: { refreshToken: stored },
+		})
 			.then((res) => revoke(res.data.idToken))
 			.catch(() => {});
 	}

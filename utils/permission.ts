@@ -19,7 +19,9 @@ export function hasPermission(
 }
 
 /** Customer-app gate: holds the required permissions and nothing beyond the customer set (fail closed). */
-export const isCustomerAccount = (permissions: Permission[] | undefined): boolean =>
+export const isCustomerAccount = (
+	permissions: Permission[] | undefined
+): boolean =>
 	hasPermission(permissions, CUSTOMER_REQUIRED_PERMISSIONS, 'all') &&
 	!!permissions &&
 	permissions.every((p) => CUSTOMER_ALLOWED_PERMISSIONS.includes(p));

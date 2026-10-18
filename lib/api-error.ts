@@ -19,5 +19,9 @@ export function parseApiError(error: unknown): ParsedApiError {
 			if (messages?.[0]) fieldErrors[field] = messages[0];
 		}
 	}
-	return { status: error.response?.status, message: body?.message, fieldErrors };
+	return {
+		status: error.response?.status,
+		message: body?.message,
+		fieldErrors,
+	};
 }

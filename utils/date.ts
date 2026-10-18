@@ -36,7 +36,13 @@ function toClinicWallDate(value: string | Date) {
 	}).formatToParts(new Date(value));
 	const part = (type: string) =>
 		Number(parts.find((item) => item.type === type)?.value);
-	return new Date(part('year'), part('month') - 1, part('day'), part('hour'), part('minute'));
+	return new Date(
+		part('year'),
+		part('month') - 1,
+		part('day'),
+		part('hour'),
+		part('minute')
+	);
 }
 
 /** Same output as `formatDate`, but the calendar day is the clinic's, whatever the runtime time zone. */

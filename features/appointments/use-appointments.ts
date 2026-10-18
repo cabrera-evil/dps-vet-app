@@ -2,8 +2,8 @@ import { useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 
 import { AppointmentStatus } from '@/constants/enum';
-import { useDelete, useGet, usePost } from '@/hooks/use-rest';
 import { usePets } from '@/features/pets/use-pets';
+import { useDelete, useGet, usePost } from '@/hooks/use-rest';
 import type {
 	Appointment,
 	AppointmentService,
@@ -58,7 +58,9 @@ export function useAppointmentViews() {
 		// Query fetch time as "now": keeps the memo pure and refreshes on every refetch.
 		const now = dataUpdatedAt;
 		const petNames = new Map(pets.map((pet) => [pet.id, pet.name]));
-		const serviceNames = new Map(services.map((service) => [service.id, service.name]));
+		const serviceNames = new Map(
+			services.map((service) => [service.id, service.name])
+		);
 		const all = appointments.map<AppointmentView>((item) => ({
 			...item,
 			petName: petNames.get(item.petId) ?? 'Tu mascota',
@@ -119,7 +121,9 @@ function useInvalidateAppointments() {
 	return () =>
 		queryClient.invalidateQueries({
 			predicate: ({ queryKey }) =>
-				((queryKey[1] as { url?: string } | undefined)?.url ?? '').startsWith(APPOINTMENTS_URL),
+				((queryKey[1] as { url?: string } | undefined)?.url ?? '').startsWith(
+					APPOINTMENTS_URL
+				),
 		});
 }
 

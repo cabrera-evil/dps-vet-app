@@ -1,0 +1,13 @@
+// AsyncStorage 3.x publishes this group in node_modules; keep repo scoped and optional.
+gradle.beforeProject { project ->
+  def asyncRepoDir = new File(project.rootProject.projectDir, "../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+  if (!asyncRepoDir.isDirectory() || project.repositories.findByName("AsyncStorageLocalRepo") != null) {
+    return
+  }
+
+  project.repositories.maven {
+    name = "AsyncStorageLocalRepo"
+    url = asyncRepoDir.toURI()
+    content { includeGroup("org.asyncstorage.shared_storage") }
+  }
+}

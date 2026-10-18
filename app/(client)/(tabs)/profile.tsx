@@ -1,5 +1,5 @@
-import { ProfileScreen } from "@/features/dashboard/components/profile-screen";
+import { ProfileScreen } from '@/features/dashboard/components/profile-screen';
 
 export default function ProfileRoute() {
-  return <ProfileScreen />;
+	return <ProfileScreen />;
 }

@@ -1,13 +1,13 @@
-import type { ReactNode } from "react";
-import { Platform, type StyleProp, type ViewStyle } from "react-native";
-import { KeyboardAvoidingView } from "@/components/ui/keyboard-avoiding-view";
-import { ScrollView } from "@/components/ui/scroll-view";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { KeyboardAvoidingView } from '@/components/ui/keyboard-avoiding-view';
+import { ScrollView } from '@/components/ui/scroll-view';
+import type { ReactNode } from 'react';
+import { Platform, type StyleProp, type ViewStyle } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type KeyboardScreenProps = {
-  children: ReactNode;
-  header?: ReactNode;
-  contentContainerStyle?: StyleProp<ViewStyle>;
+	children: ReactNode;
+	header?: ReactNode;
+	contentContainerStyle?: StyleProp<ViewStyle>;
 };
 
 // Full-screen scroller whose focused input stays above the keyboard.
@@ -17,31 +17,31 @@ type KeyboardScreenProps = {
 // The KeyboardAvoidingView must span the whole screen (header included) so no
 // keyboardVerticalOffset is needed.
 export function KeyboardScreen({
-  children,
-  header,
-  contentContainerStyle,
+	children,
+	header,
+	contentContainerStyle,
 }: KeyboardScreenProps) {
-  const insets = useSafeAreaInsets();
+	const insets = useSafeAreaInsets();
 
-  return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "android" ? "padding" : undefined}
-      className="flex-1 bg-background"
-    >
-      {header}
-      <ScrollView
-        automaticallyAdjustKeyboardInsets={Platform.OS === "ios"}
-        className="flex-1"
-        contentContainerStyle={[
-          contentContainerStyle,
-          { paddingBottom: insets.bottom + 32 },
-        ]}
-        keyboardDismissMode="on-drag"
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
-      >
-        {children}
-      </ScrollView>
-    </KeyboardAvoidingView>
-  );
+	return (
+		<KeyboardAvoidingView
+			behavior={Platform.OS === 'android' ? 'padding' : undefined}
+			className="flex-1 bg-background"
+		>
+			{header}
+			<ScrollView
+				automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
+				className="flex-1"
+				contentContainerStyle={[
+					contentContainerStyle,
+					{ paddingBottom: insets.bottom + 32 },
+				]}
+				keyboardDismissMode="on-drag"
+				keyboardShouldPersistTaps="handled"
+				showsVerticalScrollIndicator={false}
+			>
+				{children}
+			</ScrollView>
+		</KeyboardAvoidingView>
+	);
 }

@@ -1,5 +1,5 @@
-import { NewAppointmentForm } from "@/features/appointments/components/new-appointment-form";
+import { NewAppointmentForm } from '@/features/appointments/components/new-appointment-form';
 
 export default function NewAppointmentRoute() {
-  return <NewAppointmentForm />;
+	return <NewAppointmentForm />;
 }

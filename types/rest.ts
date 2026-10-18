@@ -31,7 +31,8 @@ export interface ApiError {
 }
 
 /** Returns the bearer token to attach to requests, or none to send no Authorization header. */
-export type TokenProvider = () => Promise<string | null | undefined> | string | null | undefined;
+export type TokenProvider = () =>
+	Promise<string | null | undefined> | string | null | undefined;
 
 /**
  * Invoked when the API answers 401 on a non-auth endpoint. `retried` is true when the
