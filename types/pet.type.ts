@@ -52,3 +52,17 @@ export interface PetClinicalSummary {
 	currentMedications: { id: string; name: string; instructions: string }[];
 	nextFollowUp?: { id: string; recommendedDate: string; reason: string };
 }
+
+/** GET /pets/:id/encounters item (owners only receive FINALIZED visits; staffId and audit fields are never rendered). */
+export interface PetEncounter {
+	id: string;
+	petId: string;
+	type: string;
+	status: string;
+	staffName: string;
+	occurredAt: string;
+	kind?: string;
+	reason?: string;
+	mainDiagnosis?: string;
+	requiresFollowUp: boolean;
+}

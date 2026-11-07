@@ -19,7 +19,6 @@ import {
 	useAppointmentViews,
 } from '@/features/appointments/use-appointments';
 import { useAuthSession } from '@/features/auth/auth-session-context';
-import { dashboardMock } from '@/features/dashboard/dashboard.mock';
 import { petAccent, usePets } from '@/features/pets/use-pets';
 import { DecorativeIcon } from '@/features/shared/components/decorative-icon';
 import { ScreenScroll } from '@/features/shared/components/screen-scroll';
@@ -30,6 +29,19 @@ import { formatClinicLongDate, formatClinicTime } from '@/utils/date';
 
 import { DashboardSection } from './dashboard-section';
 import { PetSummaryCard } from './pet-summary-card';
+
+const QUICK_ACTIONS = [
+	{
+		id: 'book',
+		label: 'Agendar cita',
+		description: 'Elige el mejor momento para visitarnos.',
+	},
+	{
+		id: 'history',
+		label: 'Ver historial',
+		description: 'Consulta el cuidado de tus mascotas.',
+	},
+] as const;
 
 export function ClientDashboard() {
 	const notify = useNotice();
@@ -192,7 +204,7 @@ export function ClientDashboard() {
 
 			<DashboardSection title="Acciones rápidas">
 				<View className="gap-3">
-					{dashboardMock.quickActions.map((action) => (
+					{QUICK_ACTIONS.map((action) => (
 						<Pressable
 							key={action.id}
 							accessibilityRole="button"
@@ -202,7 +214,7 @@ export function ClientDashboard() {
 									router.push('/(client)/appointments/new');
 								else if (pets.length === 1)
 									router.push({
-										pathname: '/(client)/pets/[id]',
+										pathname: '/(client)/pets/[id]/history',
 										params: { id: pets[0].id },
 									});
 								else if (pets.length > 1) router.push('/(client)/(tabs)/pets');

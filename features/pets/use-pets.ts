@@ -7,6 +7,7 @@ import type {
 	CreatePetPayload,
 	Pet,
 	PetClinicalSummary,
+	PetEncounter,
 	UpdatePetPayload,
 } from '@/types/pet.type';
 import type { ApiResponse } from '@/types/rest';
@@ -67,6 +68,24 @@ export function usePetClinicalSummary(id: string) {
 		{ enabled: id.length > 0 }
 	);
 	return { ...query, summary: query.data?.data };
+}
+
+export const ENCOUNTERS_PAGE_SIZE = 20;
+
+/** One page of the owner's finalized visits (server forces FINALIZED, newest first; no status param). */
+export function usePetEncounters(id: string, page: number) {
+	const query = useGet<ApiResponse<PetEncounter[]>>(
+		{
+			url: `${PETS_URL}/${id}/encounters`,
+			params: { page, pageSize: ENCOUNTERS_PAGE_SIZE },
+		},
+		{ enabled: id.length > 0 }
+	);
+	return {
+		...query,
+		encounters: query.data?.data ?? [],
+		total: query.data?.pagination?.total ?? 0,
+	};
 }
 
 export function useUpdatePet(id: string) {

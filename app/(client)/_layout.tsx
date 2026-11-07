@@ -25,6 +25,10 @@ export default function ClientLayout() {
 				options={{ animation: 'slide_from_right' }}
 			/>
 			<Stack.Screen
+				name="pets/[id]/history"
+				options={{ animation: 'slide_from_right' }}
+			/>
+			<Stack.Screen
 				name="pets/[id]/edit"
 				options={{ animation: 'slide_from_right' }}
 			/>

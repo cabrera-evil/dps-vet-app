@@ -204,6 +204,19 @@ export function PetDetail({ id }: { id: string }) {
 						) : null}
 					</>
 				)}
+				<Button
+					accessibilityLabel="Ver historial completo"
+					className="mt-2 min-h-12 rounded-lg"
+					onPress={() =>
+						router.push({
+							pathname: '/(client)/pets/[id]/history',
+							params: { id },
+						})
+					}
+					variant="outline"
+				>
+					<ButtonText>Ver historial completo</ButtonText>
+				</Button>
 			</Section>
 
 			<Button
