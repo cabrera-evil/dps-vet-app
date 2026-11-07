@@ -28,6 +28,7 @@ import { isCustomerAccount } from '@/utils/permission';
 const REFRESH_MARGIN_MS = 60_000;
 const AUTH_URL = {
 	token: '/auth/token',
+	google: '/auth/google',
 	refresh: '/auth/refresh',
 	logout: '/auth/logout',
 	permissions: '/auth/permissions',
@@ -35,6 +36,8 @@ const AUTH_URL = {
 
 export type AuthErrorCode =
 	| 'invalid-credentials'
+	| 'google-invalid'
+	| 'google-unavailable'
 	| 'rate-limited'
 	| 'not-customer'
 	| 'network'
@@ -200,21 +203,20 @@ async function assertCustomer(token: string): Promise<void> {
 	if (!isCustomerAccount(permissions)) throw new AuthError('not-customer');
 }
 
-export async function signInWithPassword(
-	email: string,
-	password: string
+/** Issue -> customer gate -> store. `unauthorized` is the code for a 401 from the issuing endpoint. */
+async function signInWith(
+	url: string,
+	payload: Record<string, string>,
+	unauthorized: AuthErrorCode
 ): Promise<AuthUser> {
 	let issued: TokenIssued;
 	try {
-		const res = await create<ApiResponse<TokenIssued>>({
-			url: AUTH_URL.token,
-			payload: { email, password },
-		});
+		const res = await create<ApiResponse<TokenIssued>>({ url, payload });
 		issued = res.data;
 	} catch (error) {
 		const { status, fieldErrors } = parseApiError(error);
 		if (status === 400) throw new AuthError('validation', fieldErrors);
-		if (status === 401) throw new AuthError('invalid-credentials');
+		if (status === 401) throw new AuthError(unauthorized);
 		if (status === 429) throw new AuthError('rate-limited');
 		throw new AuthError(status === undefined ? 'network' : 'unknown');
 	}
@@ -227,6 +229,16 @@ export async function signInWithPassword(
 	await setRefreshToken(issued.refreshToken);
 	return userFromToken(issued.idToken, issued.identity);
 }
+
+export const signInWithPassword = (
+	email: string,
+	password: string
+): Promise<AuthUser> =>
+	signInWith(AUTH_URL.token, { email, password }, 'invalid-credentials');
+
+/** Exchanges a Google ID token through the web API (the app never talks to Firebase). */
+export const signInWithGoogle = (googleIdToken: string): Promise<AuthUser> =>
+	signInWith(AUTH_URL.google, { idToken: googleIdToken }, 'google-invalid');
 
 /**
  * Cold-start restore. Resolves the user, or null when signed out (no/rejected token, or a

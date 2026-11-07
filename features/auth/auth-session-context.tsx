@@ -8,9 +8,11 @@ import {
 	type ReactNode,
 } from 'react';
 
+import { getGoogleIdToken } from '@/features/auth/google-id-token';
 import {
 	restoreSession,
 	setSessionEndedListener,
+	signInWithGoogle,
 	signInWithPassword,
 	signOutSession,
 } from '@/lib/auth-session';
@@ -24,6 +26,8 @@ type AuthSessionContextValue = {
 	restoreFailed: boolean;
 	/** Throws AuthError (see lib/auth-session.ts). */
 	signIn: (email: string, password: string) => Promise<void>;
+	/** Resolves without signing in when the user dismisses Google's consent screen. Throws AuthError. */
+	signInGoogle: () => Promise<void>;
 	signOut: () => Promise<void>;
 	retryRestore: () => Promise<void>;
 };
@@ -71,14 +75,31 @@ export function AuthSessionProvider({ children }: { children: ReactNode }) {
 		setStatus('signedIn');
 	}, []);
 
+	const signInGoogle = useCallback(async () => {
+		const googleIdToken = await getGoogleIdToken();
+		if (!googleIdToken) return;
+		const signedIn = await signInWithGoogle(googleIdToken);
+		setRestoreFailed(false);
+		setUser(signedIn);
+		setStatus('signedIn');
+	}, []);
+
 	const signOut = useCallback(async () => {
 		await signOutSession();
 		endLocally();
 	}, [endLocally]);
 
 	const value = useMemo(
-		() => ({ status, user, restoreFailed, signIn, signOut, retryRestore }),
-		[status, user, restoreFailed, signIn, signOut, retryRestore]
+		() => ({
+			status,
+			user,
+			restoreFailed,
+			signIn,
+			signInGoogle,
+			signOut,
+			retryRestore,
+		}),
+		[status, user, restoreFailed, signIn, signInGoogle, signOut, retryRestore]
 	);
 
 	return <AuthSessionContext value={value}>{children}</AuthSessionContext>;

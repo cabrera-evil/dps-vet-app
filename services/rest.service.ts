@@ -20,7 +20,7 @@ type RetriableConfig = InternalAxiosRequestConfig & { _retried?: boolean };
 // Auth endpoints: no bearer is attached and a 401 never enters the refresh path
 // (refreshing from inside /refresh would deadlock on the shared in-flight promise).
 const PUBLIC_AUTH_PATH =
-	/^\/auth\/(token|refresh|logout|forgot-password|reset-password)$/;
+	/^\/auth\/(token|google|refresh|logout|forgot-password|reset-password)$/;
 const isPublicRequest = (config: InternalAxiosRequestConfig): boolean => {
 	const path = (config.url ?? '').split('?')[0];
 	return (
