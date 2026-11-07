@@ -12,6 +12,7 @@ import { useAuthSession } from '@/features/auth/auth-session-context';
 import { DecorativeIcon } from '@/features/shared/components/decorative-icon';
 import { KeyboardScreen } from '@/features/shared/components/keyboard-screen';
 import { AuthError } from '@/lib/auth-session';
+import { getGoogleClientId } from '@/lib/env';
 
 import { requestErrorMessage } from '../validate';
 import { AuthLink } from './auth-link';
@@ -31,6 +32,10 @@ function messageFor(error: unknown): string | null {
 			return null;
 		case 'invalid-credentials':
 			return 'Correo o contraseña incorrectos.';
+		case 'google-invalid':
+			return 'No pudimos verificar tu cuenta de Google. Inténtalo de nuevo o usa tu correo y contraseña.';
+		case 'google-unavailable':
+			return 'El inicio de sesión con Google no está disponible por ahora.';
 		case 'rate-limited':
 			return 'Demasiados intentos. Inténtalo de nuevo más tarde.';
 		case 'not-customer':
@@ -46,11 +51,13 @@ function messageFor(error: unknown): string | null {
 const emptyValues: LoginValues = { email: '', password: '' };
 
 export function LoginScreen() {
-	const { signIn, restoreFailed, retryRestore } = useAuthSession();
+	const { signIn, signInGoogle, restoreFailed, retryRestore } =
+		useAuthSession();
 	const [values, setValues] = useState<LoginValues>(emptyValues);
 	const [errors, setErrors] = useState<LoginErrors>({});
 	const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [isGoogleSubmitting, setIsGoogleSubmitting] = useState(false);
 	const [isRetrying, setIsRetrying] = useState(false);
 	const [formError, setFormError] = useState<string | null>(null);
 	const insets = useSafeAreaInsets();
@@ -95,6 +102,18 @@ export function LoginScreen() {
 			);
 			setIsSubmitting(false);
 		}
+	};
+
+	const handleGoogle = async () => {
+		setFormError(null);
+		setIsGoogleSubmitting(true);
+		try {
+			// Dismissing the consent screen resolves without error; the form stays as it was.
+			await signInGoogle();
+		} catch (error) {
+			setFormError(messageFor(error) ?? requestErrorMessage(400));
+		}
+		setIsGoogleSubmitting(false);
 	};
 
 	const handleRetryRestore = async () => {
@@ -238,7 +257,7 @@ export function LoginScreen() {
 					<Button
 						accessibilityLabel="Iniciar sesión"
 						className="mt-7 min-h-12 rounded-lg"
-						disabled={isSubmitting}
+						disabled={isSubmitting || isGoogleSubmitting}
 						onPress={handleSubmit}
 					>
 						{isSubmitting ? <ButtonSpinner /> : null}
@@ -246,6 +265,21 @@ export function LoginScreen() {
 							{isSubmitting ? 'Iniciando sesión…' : 'Iniciar sesión'}
 						</ButtonText>
 					</Button>
+
+					{getGoogleClientId() ? (
+						<Button
+							accessibilityLabel="Continuar con Google"
+							className="mt-3 min-h-12 rounded-lg"
+							disabled={isSubmitting || isGoogleSubmitting}
+							onPress={handleGoogle}
+							variant="outline"
+						>
+							{isGoogleSubmitting ? <ButtonSpinner /> : null}
+							<ButtonText className="font-sans-semibold">
+								Continuar con Google
+							</ButtonText>
+						</Button>
+					) : null}
 
 					<View className="mt-3 items-center">
 						<AuthLink
