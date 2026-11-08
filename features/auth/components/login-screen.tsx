@@ -16,6 +16,7 @@ import { getGoogleClientId } from '@/lib/env';
 
 import { requestErrorMessage } from '../validate';
 import { AuthLink } from './auth-link';
+import { GoogleIcon } from './google-icon';
 import { LoginVisual } from './login-visual';
 
 const loginSchema = z.object({
@@ -274,7 +275,7 @@ export function LoginScreen() {
 							onPress={handleGoogle}
 							variant="outline"
 						>
-							{isGoogleSubmitting ? <ButtonSpinner /> : null}
+							{isGoogleSubmitting ? <ButtonSpinner /> : <GoogleIcon />}
 							<ButtonText className="font-sans-semibold">
 								Continuar con Google
 							</ButtonText>
