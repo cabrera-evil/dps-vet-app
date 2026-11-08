@@ -113,48 +113,50 @@ export function ClientDashboard() {
 						</Text>
 					</Pressable>
 				) : (
-					<Pressable
-						accessibilityLabel={`Ver cita de ${appointment.petName}`}
-						accessibilityRole="button"
-						className="overflow-hidden rounded-xl bg-primary p-5 active:opacity-70"
-						onPress={() =>
-							router.push({
-								pathname: '/(client)/appointments/[id]',
-								params: { id: appointment.id },
-							})
-						}
-					>
-						<View className="flex-row items-center justify-between">
-							<View className="rounded-full bg-primary-foreground/15 px-3 py-1">
-								<Text className="text-xs font-sans-semibold text-primary-foreground">
-									{APPOINTMENT_STATUS_LABEL[appointment.status]}
-								</Text>
+					<View className="overflow-hidden rounded-xl bg-primary">
+						<Pressable
+							accessibilityLabel={`Ver cita de ${appointment.petName}`}
+							accessibilityRole="button"
+							className="p-5 active:opacity-70"
+							onPress={() =>
+								router.push({
+									pathname: '/(client)/appointments/[id]',
+									params: { id: appointment.id },
+								})
+							}
+						>
+							<View className="flex-row items-center justify-between">
+								<View className="rounded-full bg-primary-foreground/15 px-3 py-1">
+									<Text className="text-xs font-sans-semibold text-primary-foreground">
+										{APPOINTMENT_STATUS_LABEL[appointment.status]}
+									</Text>
+								</View>
+								<DecorativeIcon
+									as={PawPrint}
+									className="text-primary-foreground"
+									size="xl"
+								/>
 							</View>
-							<DecorativeIcon
-								as={PawPrint}
-								className="text-primary-foreground"
-								size="xl"
-							/>
-						</View>
-						<Text className="mt-5 font-heading text-2xl text-primary-foreground">
-							{appointment.petName}
-						</Text>
-						<Text className="mt-1 text-base text-primary-foreground/90">
-							{appointment.serviceName}
-						</Text>
-						<View className="mt-5 flex-row gap-2">
-							<View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
-								<Text className="text-sm font-sans-medium text-primary-foreground">
-									{formatClinicLongDate(appointment.start)}
-								</Text>
+							<Text className="mt-5 font-heading text-2xl text-primary-foreground">
+								{appointment.petName}
+							</Text>
+							<Text className="mt-1 text-base text-primary-foreground/90">
+								{appointment.serviceName}
+							</Text>
+							<View className="mt-5 flex-row gap-2">
+								<View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
+									<Text className="text-sm font-sans-medium text-primary-foreground">
+										{formatClinicLongDate(appointment.start)}
+									</Text>
+								</View>
+								<View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
+									<Text className="text-sm font-sans-medium text-primary-foreground">
+										{formatClinicTime(appointment.start)}
+									</Text>
+								</View>
 							</View>
-							<View className="rounded-lg bg-primary-foreground/15 px-3 py-2">
-								<Text className="text-sm font-sans-medium text-primary-foreground">
-									{formatClinicTime(appointment.start)}
-								</Text>
-							</View>
-						</View>
-					</Pressable>
+						</Pressable>
+					</View>
 				)}
 			</DashboardSection>
 
