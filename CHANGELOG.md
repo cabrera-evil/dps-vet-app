@@ -1,3 +1,17 @@
+## [1.1.0](https://github.com/cabrera-evil/dps-vet-app/compare/v1.0.0...v1.1.0) (2026-11-09)
+
+### Features
+
+* **auth:** add Continuar con Google button to the login screen ([75944d7](https://github.com/cabrera-evil/dps-vet-app/commit/75944d78f177b82dcab2812c1c4485a8ae30a2b9))
+* **auth:** add Google logo to the sign-in button ([3f9dce0](https://github.com/cabrera-evil/dps-vet-app/commit/3f9dce0884f2e65969202bbe07478ad79b980f99))
+* **auth:** add Google sign-in session flow ([2e61e8b](https://github.com/cabrera-evil/dps-vet-app/commit/2e61e8b543798d9aedf0f64a84e4b9471f5bb223))
+* **pets:** add owner clinical history screen ([75f9c98](https://github.com/cabrera-evil/dps-vet-app/commit/75f9c987a236d0e0da0145ee170c13c5d1963297))
+
+### Bug Fixes
+
+* **auth:** handle Google OAuth redirect on Android ([0986a23](https://github.com/cabrera-evil/dps-vet-app/commit/0986a235c65e8bfeb67e216c3005b48cd2b4ec73))
+* **dashboard:** show text on the next appointment card ([25850b5](https://github.com/cabrera-evil/dps-vet-app/commit/25850b59c3203ca757e961dde0ad6ea8ea9c62ba))
+
 ## 1.0.0 (2026-10-19)
 
 ### Features

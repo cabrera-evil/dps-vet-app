@@ -2,19 +2,22 @@
 	"expo": {
 		"name": "Veterinaria San Roque",
 		"slug": "dps-vet-app",
-		"version": "1.0.0",
+		"version": "1.1.0",
 		"orientation": "portrait",
 		"icon": "./assets/images/icon.png",
-		"scheme": ["dpsvetapp", "com.digitaldreams.dpsvetapp"],
+		"scheme": [
+			"dpsvetapp",
+			"com.digitaldreams.dpsvetapp"
+		],
 		"userInterfaceStyle": "automatic",
 		"ios": {
 			"supportsTablet": true,
 			"bundleIdentifier": "com.digitaldreams.dpsvetapp",
-			"buildNumber": "1.0.0"
+			"buildNumber": "1.1.0"
 		},
 		"android": {
 			"package": "com.digitaldreams.dpsvetapp",
-			"versionCode": 2,
+			"versionCode": 0,
 			"adaptiveIcon": {
 				"backgroundColor": "#0F766E",
 				"foregroundImage": "./assets/images/android-icon-foreground.png",
