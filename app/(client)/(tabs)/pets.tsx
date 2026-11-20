@@ -50,8 +50,8 @@ export default function PetsRoute() {
 						})
 					}
 				>
-					<View className="h-12 w-12 items-center justify-center rounded-lg bg-secondary">
-						<PetSpeciesIcon species={pet.species} />
+					<View className="h-12 w-12 items-center justify-center overflow-hidden rounded-lg bg-secondary">
+						<PetSpeciesIcon photoUrl={pet.photoUrl} species={pet.species} />
 					</View>
 					<View className="ml-3 flex-1">
 						<Text className="font-sans-semibold text-foreground">
