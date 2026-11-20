@@ -227,3 +227,7 @@ that requires a smoke test on a device or emulator against a running API.
 - [`dps-vet-web`](https://github.com/cabrera-evil/dps-vet-web) — web client and
   API (source of truth for the REST contract, permissions, and Firestore data)
 - [Expo documentation](https://docs.expo.dev/)
+
+## License
+
+This project is licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). See [LICENSE](LICENSE).
