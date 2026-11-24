@@ -8,6 +8,7 @@ import type {
 	Pet,
 	PetClinicalSummary,
 	PetEncounter,
+	PetPhotoFile,
 	UpdatePetPayload,
 } from '@/types/pet.type';
 import type { ApiResponse } from '@/types/rest';
@@ -94,6 +95,34 @@ export function useUpdatePet(id: string) {
 	return {
 		updatePet: (payload: UpdatePetPayload) =>
 			mutation.mutateAsync({ url: `${PETS_URL}/${id}`, payload }),
+		isPending: mutation.isPending,
+	};
+}
+
+/** Takes the pet id per call because on create the pet only exists after the first request. */
+export function useUploadPetPhoto() {
+	const invalidate = useInvalidatePets();
+	const mutation = usePost<ApiResponse<Pet>>({ onSuccess: invalidate });
+	return {
+		uploadPhoto: (id: string, photo: PetPhotoFile) => {
+			const payload = new FormData();
+			payload.append('photo', photo as unknown as Blob);
+			return mutation.mutateAsync({
+				url: `${PETS_URL}/${id}/photo`,
+				payload,
+				// Overrides the JSON default for this request only; the native layer adds the boundary.
+				headers: { 'Content-Type': 'multipart/form-data' },
+			});
+		},
+		isPending: mutation.isPending,
+	};
+}
+
+export function useRemovePetPhoto(id: string) {
+	const invalidate = useInvalidatePets();
+	const mutation = useDelete<ApiResponse<Pet>>({ onSuccess: invalidate });
+	return {
+		removePhoto: () => mutation.mutateAsync({ url: `${PETS_URL}/${id}/photo` }),
 		isPending: mutation.isPending,
 	};
 }

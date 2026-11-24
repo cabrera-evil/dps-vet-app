@@ -12,16 +12,19 @@ import { Text } from '@/components/ui/text';
 import { Textarea, TextareaInput } from '@/components/ui/textarea';
 import { AppointmentSelectField } from '@/features/appointments/components/appointment-select-field';
 import { requestErrorMessage } from '@/features/auth/validate';
+import { PetPhotoField } from '@/features/pets/components/pet-photo-field';
 import {
 	useBreeds,
 	useCreatePet,
+	useRemovePetPhoto,
 	useSpecies,
 	useUpdatePet,
+	useUploadPetPhoto,
 } from '@/features/pets/use-pets';
 import { FormScreen } from '@/features/shared/components/form-screen';
 import { useNotice } from '@/hooks/use-notice';
 import { parseApiError } from '@/lib/api-error';
-import type { Pet, UpdatePetPayload } from '@/types/pet.type';
+import type { Pet, PetPhotoFile, UpdatePetPayload } from '@/types/pet.type';
 
 const petSexOptions = [
 	{ label: 'Macho', value: 'MALE' },
@@ -133,7 +136,15 @@ export function PetForm({ pet }: { pet?: Pet }) {
 	const isEdit = !!pet;
 	const { createPet, isPending: isCreating } = useCreatePet();
 	const { updatePet, isPending: isUpdating } = useUpdatePet(pet?.id ?? '');
-	const isPending = isCreating || isUpdating;
+	const { uploadPhoto, isPending: isUploading } = useUploadPetPhoto();
+	const { removePhoto, isPending: isRemoving } = useRemovePetPhoto(
+		pet?.id ?? ''
+	);
+	const isPending = isCreating || isUpdating || isUploading || isRemoving;
+	// A newly picked file is uploaded on save; a removed stored photo is deleted on save.
+	const [photo, setPhoto] = useState<PetPhotoFile | null>(null);
+	const [photoRemoved, setPhotoRemoved] = useState(false);
+	const photoChanged = photo !== null || (photoRemoved && !!pet?.photoUrl);
 	const [initialValues] = useState<NewPetValues>(() =>
 		pet ? valuesFromPet(pet) : emptyValues
 	);
@@ -197,17 +208,18 @@ export function PetForm({ pet }: { pet?: Pet }) {
 
 		const { data } = parsed;
 		setFormError(null);
+		let petId = pet?.id;
 		try {
 			if (isEdit) {
 				const diff = changedFields(initialValues, data);
-				if (Object.keys(diff).length === 0) {
+				if (Object.keys(diff).length === 0 && !photoChanged) {
 					notify('Sin cambios', 'No modificaste ningún dato.');
 					router.back();
 					return;
 				}
-				await updatePet(diff);
-			} else
-				await createPet({
+				if (Object.keys(diff).length > 0) await updatePet(diff);
+			} else {
+				const created = await createPet({
 					name: data.name,
 					species: data.species,
 					breed: data.breed || undefined,
@@ -219,6 +231,8 @@ export function PetForm({ pet }: { pet?: Pet }) {
 					markings: data.markings || undefined,
 					notes: data.notes || undefined,
 				});
+				petId = created.data.id;
+			}
 		} catch (error) {
 			const { status, fieldErrors } = parseApiError(error);
 			if (status === 400 && Object.keys(fieldErrors).length)
@@ -227,12 +241,28 @@ export function PetForm({ pet }: { pet?: Pet }) {
 			else setFormError(requestErrorMessage(status));
 			return;
 		}
+		// The pet is already saved here: a photo failure is reported without undoing it.
+		let photoFailed = false;
+		if (petId && photoChanged) {
+			try {
+				if (photo) await uploadPhoto(petId, photo);
+				else await removePhoto();
+			} catch {
+				photoFailed = true;
+			}
+		}
+		const photoNote = photoFailed
+			? ' No pudimos guardar la foto; inténtalo de nuevo desde Editar mascota.'
+			: '';
 		if (isEdit)
-			notify('Cambios guardados', `Actualizamos los datos de ${data.name}.`);
+			notify(
+				'Cambios guardados',
+				`Actualizamos los datos de ${data.name}.${photoNote}`
+			);
 		else
 			notify(
 				'Mascota registrada',
-				`${data.name} ya aparece en tu lista de mascotas.`
+				`${data.name} ya aparece en tu lista de mascotas.${photoNote}`
 			);
 		router.back();
 	};
@@ -265,6 +295,19 @@ export function PetForm({ pet }: { pet?: Pet }) {
 					Los campos con * son obligatorios.
 				</Text>
 			</View>
+
+			<PetPhotoField
+				onPick={(file) => {
+					setPhoto(file);
+					setPhotoRemoved(false);
+				}}
+				onRemove={() => {
+					setPhoto(null);
+					setPhotoRemoved(true);
+				}}
+				species={values.species}
+				uri={photo?.uri ?? (photoRemoved ? undefined : pet?.photoUrl)}
+			/>
 
 			<View className="mt-6">
 				<FieldLabel>Nombre *</FieldLabel>

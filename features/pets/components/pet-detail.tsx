@@ -11,6 +11,7 @@ import {
 	useAppointmentViews,
 } from '@/features/appointments/use-appointments';
 import { requestErrorMessage } from '@/features/auth/validate';
+import { PetSpeciesIcon } from '@/features/pets/components/pet-species-icon';
 import {
 	PetLoadStatus,
 	PetLoading,
@@ -107,6 +108,10 @@ export function PetDetail({ id }: { id: string }) {
 			subtitle={pet.breed ? `${pet.species} · ${pet.breed}` : pet.species}
 			title={pet.name}
 		>
+			<View className="mt-6 h-24 w-24 items-center justify-center self-center overflow-hidden rounded-xl bg-secondary">
+				<PetSpeciesIcon photoUrl={pet.photoUrl} species={pet.species} />
+			</View>
+
 			<Section title="Datos">
 				<Row label="Especie" value={pet.species} />
 				<Row label="Raza" value={pet.breed} />
