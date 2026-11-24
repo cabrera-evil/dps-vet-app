@@ -3,21 +3,23 @@
 Mobile application for **Veterinaria San Roque**, built for the Universidad Don
 Bosco course **Diseño y Programación de Software Multiplataforma (DPS941)**.
 The app is the client-facing side of the clinic: authentication, pets,
-appointments, and a personal profile.
+appointments, pet photos, and a personal profile.
 
 This repository is the mobile client only. It has no backend of its own and
 consumes the REST API exposed by the companion web application.
 
-## Phase 3 submission
+## Final delivery
 
 - Institution: Universidad Don Bosco
 - Course: Diseño y Programación de Software Multiplataforma — DPS941
-- Deliverable: Fase 3 del proyecto
+- Deliverable: Entrega final del proyecto (Etapa 3)
 - Students: Diana Raquel Cruz Cruz (CC253591) and Douglas Mauricio Cabrera
   Pineda (CP253590)
 - Instructor: Alexander Sigüenza
 - Web repository: <https://github.com/cabrera-evil/dps-vet-web>
 - Mobile repository: <https://github.com/cabrera-evil/dps-vet-app>
+- Deployed web application: <https://dps-vet-web.vercel.app>
+- License: [CC BY 4.0](LICENSE)
 
 The technical details below are documented from the source code in this
 repository.
@@ -173,6 +175,17 @@ keys. Auth endpoints and `POST /users` (registration) are public and never
 enter the refresh path. `hooks/use-rest.ts` exposes typed helpers on top of it,
 and `features/*/use-*.ts` hooks wrap them in TanStack Query.
 
+### Pet photos
+
+The pet form (`features/pets/components/pet-photo-field.tsx`) lets the owner
+take a photo or choose one from the gallery with `expo-image-picker`. The photo
+is sent to `POST /pets/:id/photo` as multipart form data after the pet is saved,
+and removed with `DELETE /pets/:id/photo`. The app never talks to Firebase
+Storage: the API stores the image and returns `photoUrl`, which the list,
+detail, and dashboard screens render with `expo-image`, falling back to the
+species icon. The image picker is a native module, so it needs a new development
+build.
+
 ## Shared contract with the web application
 
 This app and `dps-vet-web` consume the **same API**, so the following rules are
@@ -227,3 +240,7 @@ that requires a smoke test on a device or emulator against a running API.
 - [`dps-vet-web`](https://github.com/cabrera-evil/dps-vet-web) — web client and
   API (source of truth for the REST contract, permissions, and Firestore data)
 - [Expo documentation](https://docs.expo.dev/)
+
+## License
+
+This project is licensed under [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/). See [LICENSE](LICENSE).

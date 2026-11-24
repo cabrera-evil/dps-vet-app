@@ -13,7 +13,16 @@ export interface Pet {
 	color?: string;
 	markings?: string;
 	microchip?: string;
+	/** Read-only; set through `POST /pets/:id/photo`, never in create/update bodies. */
+	photoUrl?: string;
 	createdAt: string;
+}
+
+/** Local image picked for `POST /pets/:id/photo` (React Native multipart file part). */
+export interface PetPhotoFile {
+	uri: string;
+	name: string;
+	type: string;
 }
 
 /** POST /pets body for a client: `ownerId` and `weightKg` are never sent. */

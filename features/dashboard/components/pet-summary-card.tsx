@@ -29,9 +29,9 @@ export function PetSummaryCard({
 			}
 		>
 			<View
-				className={`h-12 w-12 items-center justify-center rounded-lg ${accentClassName}`}
+				className={`h-12 w-12 items-center justify-center overflow-hidden rounded-lg ${accentClassName}`}
 			>
-				<PetSpeciesIcon species={pet.species} />
+				<PetSpeciesIcon photoUrl={pet.photoUrl} species={pet.species} />
 			</View>
 			<Text className="mt-4 font-heading text-lg text-foreground">
 				{pet.name}
