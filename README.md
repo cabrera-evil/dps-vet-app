@@ -24,6 +24,11 @@ consumes the REST API exposed by the companion web application.
 The technical details below are documented from the source code in this
 repository.
 
+## Mockups
+
+The interface is based on the project mockups in Figma:
+[DPS Veterinaria](https://www.figma.com/design/7ytJuwuUwrIMl5qGUc4ko1/DPS-Veterinaria?node-id=0-1&t=r2UnOM64Oi9PBQwc-1).
+
 ## Technology stack
 
 - **Runtime:** Node.js 22+ and pnpm 10.16.1
@@ -31,7 +36,7 @@ repository.
 - **Language:** strict TypeScript 6
 - **Styling/UI:** NativeWind 5 (Tailwind CSS 4), Gluestack UI primitives,
   `tailwind-variants`, Lucide icons, and Reanimated
-- **Authentication:** token-based sign-in against the web API; the refresh
+- **Authentication:** token-based email/password and Google sign-in against the web API; the refresh
   token is stored with `expo-secure-store`
 - **Data access:** Axios REST client and TanStack React Query
 - **Forms and validation:** Zod schemas shared by the form screens
